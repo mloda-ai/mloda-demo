@@ -216,3 +216,6 @@ demo_data/credit_risk_mlp.pt
 
 # Marimo ad-hoc HTML exports
 /out.html
+
+# applydata 2026 handbook (working/scratch document)
+demo/applydata_handbook.md

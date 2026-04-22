@@ -48,7 +48,8 @@ def test_input_features_cover_all_german_credit_columns() -> None:
     names = {str(f.name) for f in features}
     for col in FEATURE_COLUMNS:
         assert col in names
-    assert "customer_id" in names
+    # customer_id is the join key (declared via index_columns), not an input feature.
+    assert "customer_id" not in names
 
 
 @pytest.mark.slow

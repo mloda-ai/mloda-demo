@@ -6,24 +6,27 @@
 
 Live demo built for the **applydata Berlin 2026** talk *"Building Deterministic Context Layers for AI Agents"*.
 
-Mixed-source credit-risk pipeline: JSON + synthetic Excel + synthetic Markdown → one row per customer → an MLP classifier trained on UCI German Credit → Fraunhofer Zennit LRP attribution → method swap (EpsilonPlus ↔ Gradient). All orchestrated by mloda FeatureGroups. Packaged as a reactive marimo notebook.
+Mixed-source credit-risk pipeline: JSON + synthetic Excel + synthetic Markdown → one row per customer → an MLP classifier trained on UCI German Credit → Fraunhofer Zennit LRP attribution → method swap (EpsilonPlus ↔ Gradient). All orchestrated by mloda FeatureGroups. Executable as a deterministic CLI tool.
 
 > The point of the demo: **the LLM / agent on top is non-deterministic. The context layer below it is deterministic.** Same mixed-source inputs always produce the same predictions and the same explanations.
 
-## Quick reproduce
+## Quick start
 
 ```bash
 uv venv
 source .venv/bin/activate
 uv sync --all-extras
 
-python scripts/fetch_german_credit.py
-python scripts/synthesize_docs.py
-
-marimo edit demo/applydata_credit_xai.py
+which mloda-demo  # verify CLI is installed
+mloda-demo discover
+mloda-demo run --customer app-customer-c
+mloda-demo predict --customer app-customer-c
+mloda-demo explain --customer app-customer-c
 ```
 
-Run all checks with `tox`. Run integration tests explicitly with `pytest -m slow`.
+See [demo/applydata_handbook.md](demo/applydata_handbook.md) for the full 6-act demo script.
+
+Run all checks with `tox`. Run integration tests with `pytest -m slow`.
 
 ## Structure
 
@@ -31,15 +34,13 @@ Run all checks with `tox`. Run integration tests explicitly with `pytest -m slow
 mloda_demo/
 ├── feature_groups/
 │   ├── inputs/                   # 3 root FGs: applications.json, xlsx, markdown
-│   ├── classifier/               # MLP + artifact + CreditRiskClassifierFG
-│   └── merged/                   # reserved for future CustomerRow FG
+│   └── classifier/               # MLP + artifact + CreditRiskClassifierFG
 ├── xai/                          # vendored from mloda-fraunhofer-xai
 │   ├── attribution/              # Zennit LRP + Gradient attribution FGs
 │   └── visualization/            # heatmap renderer
-demo_data/                        # pruned fake_data + synthetic docs + German Credit CSV
-scripts/                          # fetch and synthesize helpers
-demo/                             # marimo notebook
-tests/                            # unit + integration
+demo_data/                        # customer data + trained artifacts
+demo/                             # applydata_handbook.md (CLI demo script)
+tests/                            # unit + integration CLI tests
 ```
 
 ## Attribution

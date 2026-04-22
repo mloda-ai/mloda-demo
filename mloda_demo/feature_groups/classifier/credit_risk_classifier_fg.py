@@ -51,7 +51,9 @@ class CreditRiskClassifierFG(FeatureGroup):
         return [Index(("customer_id",))]
 
     def input_features(self, options: Options, feature_name: FeatureName) -> Optional[Set[Feature]]:
-        return {Feature.not_typed(col) for col in ("customer_id", *FEATURE_COLUMNS)}
+        # customer_id is the join key (declared via index_columns); requesting it
+        # here creates ambiguity because all three input FGs claim it.
+        return {Feature.not_typed(col) for col in FEATURE_COLUMNS}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

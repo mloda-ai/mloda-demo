@@ -23,6 +23,9 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 
+[project.scripts]
+mloda-demo = "mloda_demo.cli:main"
+
 [project.optional-dependencies]
 dev = [
     "tox",
