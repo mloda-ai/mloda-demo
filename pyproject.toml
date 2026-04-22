@@ -3,14 +3,24 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "placeholder-my-plugin"
-# Always start at least at 0.2.0 to make semver work.
-# Initial release for semver needs also a manually pushed minimum tag (likely 0.2.0).
-version = "0.3.4"
-description = "TEMPLATE PLACEHOLDER - Do not install directly. This package reserves the name for mloda-plugin-template. See https://github.com/mloda-ai/mloda-plugin-template"
+name = "mloda-demo"
+version = "0.1.0"
+description = "Live demo: mixed-source features, TabPFN zero-shot prediction, Fraunhofer Zennit XAI attribution, orchestrated by mloda. Built for the applydata Berlin 2026 talk."
 license = "Apache-2.0"
-authors = [{ name = "Your Name placeholder", email = "placeholder@placeholder.com" }]
-dependencies = ["mloda>=0.5.4", "mloda-testing>=0.2.11"]
+authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
+dependencies = [
+    "mloda>=0.5.4",
+    "mloda-testing>=0.2.11",
+    "pandas",
+    "numpy",
+    "openpyxl",
+    "torch",
+    "zennit",
+    "tabpfn",
+    "openml",
+    "marimo",
+    "matplotlib",
+]
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
@@ -25,11 +35,14 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["placeholder*"]
+include = ["mloda_demo*"]
 
 [tool.pytest.ini_options]
-testpaths = ["placeholder", "tests"]
+testpaths = ["mloda_demo", "tests"]
 python_files = ["test_*.py"]
+markers = [
+    "slow: integration tests that load TabPFN / run attribution (deselect with -m 'not slow')",
+]
 
 [tool.ruff]
 line-length = 120
@@ -39,9 +52,17 @@ strict = true
 ignore_missing_imports = true
 namespace_packages = true
 explicit_package_bases = true
+exclude = [
+    "^scripts/",
+    "^demo/",
+    "^\\.tox/",
+    "^\\.venv/",
+]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+ignore_errors = true
 
 [tool.bandit]
 exclude_dirs = [".tox", ".venv", "tests"]
 
-[tool.uv]
-exclude-newer = "7 days"
