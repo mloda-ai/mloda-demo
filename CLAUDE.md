@@ -40,6 +40,14 @@ mypy --strict --ignore-missing-imports .
 bandit -c pyproject.toml -r -q .
 ```
 
+## Plugin Development Guides
+
+When developing FeatureGroups, ComputeFrameworks, Extenders, or other mloda plugins, consult:
+
+- [mloda-registry](https://github.com/mloda-ai/mloda-registry) — 40+ plugin development guides in `docs/guides/`
+- These guides provide decision trees and patterns for common mloda plugin scenarios
+- Examples: handling state, serialization, caching, error handling, testing
+
 ## Commit messages
 
 Use Conventional Commit format for all commits so semantic versioning/release tooling can parse intent.

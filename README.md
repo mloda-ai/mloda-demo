@@ -46,6 +46,7 @@ tests/                            # unit + integration CLI tests
 ## Open Source Libraries
 
 - [mloda](https://github.com/mloda-ai/mloda) — feature orchestration framework (Apache 2.0)
+- [mloda-registry](https://github.com/mloda-ai/mloda-registry) — plugins, guides, and best practices (Apache 2.0)
 - [PyTorch](https://pytorch.org/) — MLP model training and inference (BSD 3-Clause)
 - [Zennit](https://github.com/chr5tphr/zennit) — Layer-wise Relevance Propagation (LGPLv3+)
 - [OpenML](https://www.openml.org/) — German Credit dataset source

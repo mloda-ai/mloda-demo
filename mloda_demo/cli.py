@@ -165,7 +165,11 @@ def cmd_run(args: argparse.Namespace) -> int:
         return 1
     features: list[Feature | str] = [Feature.not_typed(name) for name in feature_names]
 
-    kwargs: dict[str, Any] = {"features": features, "compute_frameworks": ["PandasDataFrame"]}
+    kwargs: dict[str, Any] = {
+        "features": features,
+        "compute_frameworks": ["PandasDataFrame"],
+        "links": _build_input_links(args.data_source),
+    }
 
     if args.lineage:
         extender = LineageExtender()

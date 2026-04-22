@@ -51,12 +51,17 @@ Examples:
 - `fix: handle empty feature set`
 - `chore(deps): bump mloda to 0.4.6`
 
-## Claude Code Skills
+## mloda-registry: Plugin Development Resources
 
-The mloda-registry provides Claude Code skills that assist with plugin development:
+The [mloda-registry](https://github.com/mloda-ai/mloda-registry) provides essential documentation and patterns for mloda development:
 
-- https://github.com/mloda-ai/mloda-registry/tree/main/.claude/skills/
+**Documentation & Guides:**
+- Plugin development guides: `docs/guides/` (40+ patterns and decision trees)
+- Best practices for FeatureGroups, ComputeFrameworks, Extenders, and Linkers
+- Testing utilities and conventions
 
-When helping with FeatureGroups, ComputeFrameworks, or Extenders, leverage these skills for pattern guidance and best practices.
+**Claude Code Skills:**
+- `.claude/skills/` — skills that assist with plugin development
+- Leverage these for pattern guidance when implementing FeatureGroups, ComputeFrameworks, or Extenders
 
 Consider generating project-specific skills for your own plugin repository to provide tailored AI assistance for your implementation patterns and conventions.
