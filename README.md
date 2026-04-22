@@ -43,8 +43,10 @@ demo/                             # applydata_handbook.md (CLI demo script)
 tests/                            # unit + integration CLI tests
 ```
 
-## Related
+## Open Source Libraries
 
-- [mloda](https://github.com/mloda-ai/mloda) — core library
+- [mloda](https://github.com/mloda-ai/mloda) — feature orchestration framework (Apache 2.0)
+- [PyTorch](https://pytorch.org/) — MLP model training and inference (BSD 3-Clause)
 - [Zennit](https://github.com/chr5tphr/zennit) — Layer-wise Relevance Propagation (LGPLv3+)
+- [OpenML](https://www.openml.org/) — German Credit dataset source
 - [mloda-plugin-template](https://github.com/mloda-ai/mloda-plugin-template) — starting point for this repo
