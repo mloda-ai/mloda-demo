@@ -1,0 +1,72 @@
+[
+  {
+    "id": "app-customer-a",
+    "applicant_name": "Customer A",
+    "customer_name": "Customer A GmbH",
+    "requested_amount": 2500,
+    "currency": "EUR",
+    "purpose": "new car",
+    "status": "review",
+    "review_status": "to_be_reviewed",
+    "assigned_to": "user-anna-s",
+    "assigned_role": "credit_analyst",
+    "notes": "",
+    "created_at": "2026-02-04T09:00:00+00:00"
+  },
+  {
+    "id": "app-customer-b",
+    "applicant_name": "Customer B",
+    "customer_name": "Customer B AG",
+    "requested_amount": 5000,
+    "currency": "EUR",
+    "purpose": "business",
+    "status": "review",
+    "review_status": "to_be_reviewed",
+    "assigned_to": "user-anna-s",
+    "assigned_role": "credit_analyst",
+    "notes": "",
+    "created_at": "2026-02-03T14:30:00+00:00"
+  },
+  {
+    "id": "app-customer-c",
+    "applicant_name": "Customer C",
+    "customer_name": "Customer C e.K.",
+    "requested_amount": 1200,
+    "currency": "EUR",
+    "purpose": "furniture/equipment",
+    "status": "review",
+    "review_status": "ongoing",
+    "assigned_to": "user-tom-k",
+    "assigned_role": "head_of_risk",
+    "notes": "",
+    "created_at": "2026-02-03T10:15:00+00:00"
+  },
+  {
+    "id": "app-customer-d",
+    "applicant_name": "Customer D",
+    "customer_name": "Customer D GmbH & Co. KG",
+    "requested_amount": 7500,
+    "currency": "EUR",
+    "purpose": "used car",
+    "status": "review",
+    "review_status": "ongoing",
+    "assigned_to": "user-max-m",
+    "assigned_role": "credit_analyst",
+    "notes": "",
+    "created_at": "2026-02-02T11:00:00+00:00"
+  },
+  {
+    "id": "app-customer-e",
+    "applicant_name": "Customer E",
+    "customer_name": "Customer E OHG",
+    "requested_amount": 3000,
+    "currency": "EUR",
+    "purpose": "radio/tv",
+    "status": "review",
+    "review_status": "ongoing",
+    "assigned_to": "user-max-m",
+    "assigned_role": "credit_analyst",
+    "notes": "",
+    "created_at": "2026-02-02T08:45:00+00:00"
+  }
+]
