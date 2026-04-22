@@ -35,7 +35,7 @@ mloda_demo/
 ├── feature_groups/
 │   ├── inputs/                   # 3 root FGs: applications.json, xlsx, markdown
 │   └── classifier/               # MLP + artifact + CreditRiskClassifierFG
-├── xai/                          # vendored from mloda-fraunhofer-xai
+├── xai/
 │   ├── attribution/              # Zennit LRP + Gradient attribution FGs
 │   └── visualization/            # heatmap renderer
 demo_data/                        # customer data + trained artifacts
@@ -43,12 +43,8 @@ demo/                             # applydata_handbook.md (CLI demo script)
 tests/                            # unit + integration CLI tests
 ```
 
-## Attribution
-
-The `mloda_demo/xai/` tree is vendored (copy-pasted) from [mloda-fraunhofer-xai](https://github.com/mloda-ai/mloda-fraunhofer-xai). Each file carries a provenance header pointing at the upstream source.
-
 ## Related
 
 - [mloda](https://github.com/mloda-ai/mloda) — core library
-- [mloda-fraunhofer-xai](https://github.com/mloda-ai/mloda-fraunhofer-xai) — upstream XAI plugins
+- [Zennit](https://github.com/chr5tphr/zennit) — Layer-wise Relevance Propagation (LGPLv3+)
 - [mloda-plugin-template](https://github.com/mloda-ai/mloda-plugin-template) — starting point for this repo

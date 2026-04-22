@@ -1,6 +1,3 @@
-# Adapted from https://github.com/mloda-ai/mloda-fraunhofer-xai
-# (fraunhofer_xai/feature_groups/attribution/model_artifact.py)
-
 from __future__ import annotations
 
 from typing import Any, Dict, Optional

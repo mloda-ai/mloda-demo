@@ -1,6 +1,3 @@
-# Adapted from https://github.com/mloda-ai/mloda-fraunhofer-xai
-# (fraunhofer_xai/feature_groups/attribution/base_attribution.py)
-
 from __future__ import annotations
 
 import hashlib
