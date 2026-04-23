@@ -209,3 +209,13 @@ __marimo__/
 
 # mloda-plugin-template
 security-reports/
+
+# mloda-demo: regenerated on first notebook run
+demo_data/credit_risk_classifier.pkl
+demo_data/credit_risk_mlp.pt
+
+# Marimo ad-hoc HTML exports
+/out.html
+
+# applydata 2026 handbook (working/scratch document)
+demo/applydata_handbook.md
