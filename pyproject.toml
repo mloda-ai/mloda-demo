@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=83.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,8 +9,8 @@ description = "Live demo: mixed-source features, MLP classifier, Zennit LRP attr
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
-    "mloda>=0.5.4",
-    "mloda-testing>=0.2.11",
+    "mloda>=0.10.0",
+    "mloda-testing>=0.3.2",
     "pandas",
     "numpy",
     "openpyxl",
