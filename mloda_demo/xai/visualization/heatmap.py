@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Set
+from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
-
-from mloda.provider import DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet
-from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
-
 from mloda.core.abstract_plugins.components.feature_name import FeatureName
 from mloda.core.abstract_plugins.components.options import Options
+from mloda.provider import DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
 
 class HeatmapFeatureGroup(FeatureChainParserMixin, FeatureGroup):
@@ -30,7 +28,7 @@ class HeatmapFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     COLORMAP = "colormap"
     TITLE = "title"
 
-    PROPERTY_MAPPING = {
+    PROPERTY_MAPPING: ClassVar[dict[Any, dict[Any, Any]]] = {
         COLORMAP: {
             "explanation": "Matplotlib colormap name (default: RdBu_r)",
             DefaultOptionKeys.context: True,
@@ -64,7 +62,7 @@ class HeatmapPandasFeatureGroup(HeatmapFeatureGroup):
     """Pandas implementation: renders heatmap to base64 PNG."""
 
     @classmethod
-    def compute_framework_rule(cls) -> Set[type[Any]]:
+    def compute_framework_rule(cls) -> set[type[Any]]:
         return {PandasDataFrame}
 
     @classmethod

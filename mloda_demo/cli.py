@@ -17,32 +17,32 @@ import argparse
 import json
 import sqlite3
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, Optional, Sequence, cast
+from typing import Any, cast
 
 import pandas as pd
-
-# Importing the demo FGs registers them so mloda.run_all and
-# get_feature_group_docs can see them. The demo uses explicit imports rather
-# than entry-point discovery (PluginLoader.all() is a no-op here).
-from mloda_demo.extenders.lineage_extender import LineageExtender
-from mloda_demo.feature_groups.classifier.artifact import MODEL_STATE_PATH, load_artifact
-from mloda_demo.feature_groups.classifier.credit_risk_classifier_fg import (  # noqa: F401
-    CreditRiskClassifierFG,
-    _ensure_artifact,
-)
-from mloda_demo.feature_groups.classifier.encoder import FEATURE_COLUMNS
-from mloda_demo.feature_groups.inputs.financials_fg import FinancialsFG
-from mloda_demo.feature_groups.inputs.questionnaire_fg import QuestionnaireFG
-from mloda_demo.xai.attribution.gradient_attribution import GradientAttributionFeatureGroup  # noqa: F401
-from mloda_demo.xai.attribution.zennit_attribution import ZennitAttributionFeatureGroup  # noqa: F401
-
 from mloda.core.api.plugin_docs import get_feature_group_docs
 from mloda.core.core.step.feature_group_step import FeatureGroupStep
 from mloda.core.filter.filter_type_enum import FilterType
 from mloda.core.filter.global_filter import GlobalFilter
 from mloda.user import Feature, Link
 from mloda.user import mloda as mloda_api
+
+# Importing the demo FGs registers them so mloda.run_all and
+# get_feature_group_docs can see them. The demo uses explicit imports rather
+# than entry-point discovery (PluginLoader.all() is a no-op here).
+from mloda_demo.extenders.lineage_extender import LineageExtender
+from mloda_demo.feature_groups.classifier.artifact import MODEL_STATE_PATH, load_artifact
+from mloda_demo.feature_groups.classifier.credit_risk_classifier_fg import (
+    CreditRiskClassifierFG,
+    _ensure_artifact,
+)
+from mloda_demo.feature_groups.classifier.encoder import FEATURE_COLUMNS
+from mloda_demo.feature_groups.inputs.financials_fg import FinancialsFG
+from mloda_demo.feature_groups.inputs.questionnaire_fg import QuestionnaireFG
+from mloda_demo.xai.attribution.gradient_attribution import GradientAttributionFeatureGroup
+from mloda_demo.xai.attribution.zennit_attribution import ZennitAttributionFeatureGroup
 
 # Lazy-load ApplicationsFG implementations to avoid __subclasses__ conflicts.
 # Only the active implementation is imported, allowing JSON/SQLite backend swapping.
@@ -276,7 +276,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
         if isinstance(step, FeatureGroupStep):
             step_num += 1
             fg_name = step.feature_group.__name__
-            feat_names = sorted(set(str(f.name) for f in step.features.features))
+            feat_names = sorted({str(f.name) for f in step.features.features})
             feat_str = ", ".join(feat_names) if feat_names else ""
             fg_steps.append((step_num, fg_name, feat_str))
             print(f"  [{step_num}] {fg_name:<25}  ->  {feat_str}")
@@ -302,7 +302,7 @@ def cmd_migrate(args: argparse.Namespace) -> int:
     try:
         with open(json_path) as f:
             data = json.load(f)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - CLI boundary, any read/parse failure becomes exit code 1
         print(f"Error reading {json_path}: {e}", file=sys.stderr)
         return 1
 
@@ -433,7 +433,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     func = args.func

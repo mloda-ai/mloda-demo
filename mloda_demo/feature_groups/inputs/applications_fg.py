@@ -9,10 +9,9 @@ Columns emitted:
 from __future__ import annotations
 
 import json
-from typing import Any, List, Optional, Set, Type
+from typing import Any
 
 import pandas as pd
-
 from mloda.provider import BaseInputData, ComputeFramework, DataCreator, FeatureGroup, FeatureSet
 from mloda.user import Index
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
@@ -25,14 +24,14 @@ COLUMNS = {"customer_id", "credit_amount", "purpose"}
 class ApplicationsFG(FeatureGroup):
     """Structured applicant metadata loaded from applications.json."""
 
-    compute_framework: Type[ComputeFramework] = PandasDataFrame
+    compute_framework: type[ComputeFramework] = PandasDataFrame
 
     @classmethod
-    def index_columns(cls) -> Optional[List[Index]]:
+    def index_columns(cls) -> list[Index] | None:
         return [Index(("customer_id",))]
 
     @classmethod
-    def input_data(cls) -> Optional[BaseInputData]:
+    def input_data(cls) -> BaseInputData | None:
         return DataCreator(COLUMNS)
 
     @classmethod
@@ -49,5 +48,5 @@ class ApplicationsFG(FeatureGroup):
         return df
 
     @classmethod
-    def compute_framework_rule(cls) -> Optional[Set[Type[ComputeFramework]]]:
+    def compute_framework_rule(cls) -> set[type[ComputeFramework]] | None:
         return {cls.compute_framework}

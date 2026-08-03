@@ -10,7 +10,6 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 import pytest
-
 from mloda.user import Feature
 from mloda.user import mloda as mloda_api
 
@@ -27,7 +26,6 @@ from mloda_demo.feature_groups.inputs.financials_fg import FinancialsFG
 from mloda_demo.feature_groups.inputs.questionnaire_fg import QuestionnaireFG
 from mloda_demo.xai.attribution.gradient_attribution import GradientAttributionFeatureGroup
 from mloda_demo.xai.attribution.zennit_attribution import ZennitAttributionFeatureGroup
-
 
 KNOWN_CUSTOMER = "app-customer-c"
 

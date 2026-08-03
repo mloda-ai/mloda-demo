@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import hashlib
 from abc import abstractmethod
-from typing import Any, List, Optional, Set, Type
+from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
-
 from mloda.provider import BaseArtifact, DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
@@ -33,9 +32,9 @@ class AttributionFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     PREFIX_PATTERN = r".*__attribution$"
 
     MIN_IN_FEATURES = 1
-    MAX_IN_FEATURES: Optional[int] = None
+    MAX_IN_FEATURES: int | None = None
 
-    PROPERTY_MAPPING = {
+    PROPERTY_MAPPING: ClassVar[dict[Any, dict[Any, Any]]] = {
         MODEL_PATH: {
             "explanation": "Path to the serialized model file",
             DefaultOptionKeys.context: True,
@@ -55,7 +54,7 @@ class AttributionFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     }
 
     @staticmethod
-    def artifact() -> Type[BaseArtifact] | None:
+    def artifact() -> type[BaseArtifact] | None:
         return ModelArtifact
 
     @staticmethod
@@ -97,10 +96,10 @@ class AttributionFeatureGroup(FeatureChainParserMixin, FeatureGroup):
         data: Any,
         features: FeatureSet,
         output_name: str,
-        source_features: List[str],
+        source_features: list[str],
         model_path: str,
         xai_method: str,
-        target_class: Optional[int],
+        target_class: int | None,
     ) -> Any: ...
 
 
@@ -112,7 +111,7 @@ class AttributionPandasFeatureGroup(AttributionFeatureGroup):
     """
 
     @classmethod
-    def compute_framework_rule(cls) -> Set[type[Any]]:
+    def compute_framework_rule(cls) -> set[type[Any]]:
         return {PandasDataFrame}
 
     @classmethod
@@ -152,7 +151,7 @@ class AttributionPandasFeatureGroup(AttributionFeatureGroup):
         model: Any,
         input_data: np.ndarray[Any, Any],
         xai_method: str,
-        target_class: Optional[int],
+        target_class: int | None,
     ) -> np.ndarray[Any, Any]:
         """Compute attributions for the given input batch. Returns array of same shape as input."""
         ...
@@ -163,10 +162,10 @@ class AttributionPandasFeatureGroup(AttributionFeatureGroup):
         data: Any,
         features: FeatureSet,
         output_name: str,
-        source_features: List[str],
+        source_features: list[str],
         model_path: str,
         xai_method: str,
-        target_class: Optional[int],
+        target_class: int | None,
     ) -> Any:
         df: pd.DataFrame = data
         artifact_key = cls._artifact_key(output_name, xai_method)

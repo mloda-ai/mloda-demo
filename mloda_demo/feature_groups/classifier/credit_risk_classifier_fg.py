@@ -11,11 +11,10 @@ Zennit attribution FG to pick up via its `_load_model(model_path)` hook.
 
 from __future__ import annotations
 
-from typing import Any, List, Optional, Set, Type
+from typing import Any
 
 import pandas as pd
 import torch
-
 from mloda.provider import ComputeFramework, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Index, Options
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
@@ -40,17 +39,17 @@ from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
 class CreditRiskClassifierFG(FeatureGroup):
     """Emit the predicted credit-risk class per customer."""
 
-    compute_framework: Type[ComputeFramework] = PandasDataFrame
+    compute_framework: type[ComputeFramework] = PandasDataFrame
 
     @classmethod
     def match_feature_group_criteria(cls, feature_name: Any, options: Any, _data_access_collection: Any = None) -> bool:
         return str(feature_name) == "credit_risk"
 
     @classmethod
-    def index_columns(cls) -> Optional[List[Index]]:
+    def index_columns(cls) -> list[Index] | None:
         return [Index(("customer_id",))]
 
-    def input_features(self, options: Options, feature_name: FeatureName) -> Optional[Set[Feature]]:
+    def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
         # customer_id is the join key (declared via index_columns); requesting it
         # here creates ambiguity because all three input FGs claim it.
         return {Feature.not_typed(col) for col in FEATURE_COLUMNS}
@@ -66,7 +65,7 @@ class CreditRiskClassifierFG(FeatureGroup):
         return {"credit_risk": preds.tolist()}
 
     @classmethod
-    def compute_framework_rule(cls) -> Optional[Set[Type[ComputeFramework]]]:
+    def compute_framework_rule(cls) -> set[type[ComputeFramework]] | None:
         return {cls.compute_framework}
 
 
@@ -86,4 +85,4 @@ def _ensure_artifact() -> ClassifierArtifact:
     return artifact
 
 
-__all__ = ["CreditRiskClassifierFG", "ARTIFACT_PATH", "MODEL_STATE_PATH"]
+__all__ = ["ARTIFACT_PATH", "MODEL_STATE_PATH", "CreditRiskClassifierFG"]
