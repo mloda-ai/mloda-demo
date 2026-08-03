@@ -25,7 +25,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
+from torch import nn
 from zennit.attribution import Gradient
 from zennit.composites import EpsilonPlus
 
@@ -98,7 +98,7 @@ class _TabPFNProxy(torch.autograd.Function):
         wrapper = ctx.wrapper
         grad_out_np = grad_output.detach().cpu().numpy()
         eps = wrapper.epsilon
-        n_samples, n_features = query_np.shape
+        _n_samples, n_features = query_np.shape
         jvp = np.zeros_like(query_np)
         for j in range(n_features):
             bumped_plus = query_np.copy()

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional
+from typing import Any
 
 from mloda.provider import BaseArtifact, FeatureSet
 
@@ -14,18 +14,18 @@ class ModelArtifact(BaseArtifact):
     """
 
     @classmethod
-    def custom_saver(cls, features: FeatureSet, artifact: Any) -> Optional[Any]:
+    def custom_saver(cls, features: FeatureSet, artifact: Any) -> Any | None:
         return artifact
 
     @classmethod
-    def custom_loader(cls, features: FeatureSet) -> Optional[Any]:
+    def custom_loader(cls, features: FeatureSet) -> Any | None:
         options = cls.get_singular_option_from_options(features)
         if options is None or features.name_of_one_feature is None:
             return None
         return options.get(str(features.name_of_one_feature))
 
     @classmethod
-    def load_model(cls, features: FeatureSet, artifact_key: str) -> Optional[Dict[str, Any]]:
+    def load_model(cls, features: FeatureSet, artifact_key: str) -> dict[str, Any] | None:
         if features.artifact_to_load:
             artifacts = cls.custom_loader(features)
             if artifacts and isinstance(artifacts, dict) and artifact_key in artifacts:
@@ -33,7 +33,7 @@ class ModelArtifact(BaseArtifact):
         return None
 
     @classmethod
-    def save_model(cls, features: FeatureSet, artifact_key: str, artifact_data: Dict[str, Any]) -> None:
+    def save_model(cls, features: FeatureSet, artifact_key: str, artifact_data: dict[str, Any]) -> None:
         if features.artifact_to_save:
             if not isinstance(features.save_artifact, dict):
                 features.save_artifact = {}

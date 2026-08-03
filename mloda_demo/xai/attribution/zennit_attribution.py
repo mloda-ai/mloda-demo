@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Optional, Set
+from typing import Any
 
 import numpy as np
-
 from mloda.core.abstract_plugins.components.feature_name import FeatureName
 from mloda.core.abstract_plugins.components.options import Options
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
 from mloda_demo.xai.attribution.base_attribution import AttributionPandasFeatureGroup
-
 
 SUPPORTED_METHODS = frozenset({"LRP", "EpsilonPlus", "EpsilonAlpha2Beta1"})
 
@@ -35,7 +33,7 @@ class ZennitAttributionFeatureGroup(AttributionPandasFeatureGroup):
         return super().match_feature_group_criteria(feature_name, options, _data_access_collection)
 
     @classmethod
-    def compute_framework_rule(cls) -> Set[type[Any]]:
+    def compute_framework_rule(cls) -> set[type[Any]]:
         return {PandasDataFrame}
 
     @classmethod
@@ -52,7 +50,7 @@ class ZennitAttributionFeatureGroup(AttributionPandasFeatureGroup):
         model: Any,
         input_data: np.ndarray[Any, Any],
         xai_method: str,
-        target_class: Optional[int],
+        target_class: int | None,
     ) -> np.ndarray[Any, Any]:
         import torch
         from zennit.attribution import Gradient

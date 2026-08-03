@@ -22,8 +22,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 from zennit.attribution import Gradient
 from zennit.composites import EpsilonPlus
 
