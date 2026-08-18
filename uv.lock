@@ -1152,7 +1152,7 @@ requires-dist = [
     { name = "bandit", marker = "extra == 'dev'" },
     { name = "matplotlib" },
     { name = "mloda", specifier = ">=0.11.1,<0.12.0" },
-    { name = "mloda-testing", specifier = ">=0.2.11" },
+    { name = "mloda-testing", specifier = ">=0.4.3" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },
     { name = "openml" },
@@ -1169,14 +1169,14 @@ provides-extras = ["dev"]
 
 [[package]]
 name = "mloda-testing"
-version = "0.2.12"
+version = "0.4.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mloda" },
     { name = "pytest" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/bf/2413fe5a164d1cd9fbc3cd6d6a65e5e35bec2f46d0ce624b3e4cac2b9d9e/mloda_testing-0.2.12-py3-none-any.whl", hash = "sha256:497033b8096796856208381445beed0cac0e90a3387b3eec6bcbc3f8ba09a7f3", size = 1790, upload-time = "2026-03-12T12:24:49.789Z" },
+    { url = "https://files.pythonhosted.org/packages/58/9e/2da8122525ce87f4eddda9e14bbe28649cb5c17b5e00aef52b4c64053410/mloda_testing-0.4.5-py3-none-any.whl", hash = "sha256:ce647c5b9b2a1750007a63c28f8b7664edd67f735cd48edc80c764eb37740b29", size = 134280, upload-time = "2026-08-20T10:00:54.078Z" },
 ]
 
 [[package]]

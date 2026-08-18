@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -10,7 +10,7 @@ license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
     "mloda>=0.11.1,<0.12.0",
-    "mloda-testing>=0.2.11",
+    "mloda-testing>=0.4.3",
     "pandas",
     "numpy",
     "openpyxl",
