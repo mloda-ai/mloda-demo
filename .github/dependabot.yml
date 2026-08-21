@@ -13,3 +13,9 @@ updates:
       all-dependencies:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "mloda"
+        - "mloda-registry"
+        - "mloda-testing"
