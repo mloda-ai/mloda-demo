@@ -37,14 +37,15 @@ class AttributionFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     TARGET_CLASS = "target_class"
 
     PREFIX_PATTERN = r".*__attribution$"
+    RECOGNITION_ONLY_PATTERN = True
 
     MIN_IN_FEATURES = 1
     MAX_IN_FEATURES: int | None = None
 
     PROPERTY_MAPPING: ClassVar = {
         MODEL_PATH: property_spec("Path to the serialized model file"),
-        XAI_METHOD: property_spec("Attribution method name (e.g. LRP, DeepLift, GradCAM)"),
-        TARGET_CLASS: property_spec("Target class index for attribution (default: predicted class)"),
+        XAI_METHOD: property_spec("Attribution method name (e.g. LRP, DeepLift, GradCAM)", default=None),
+        TARGET_CLASS: property_spec("Target class index for attribution (default: predicted class)", default=None),
         DefaultOptionKeys.in_features: property_spec("Source features for attribution (comma-separated)"),
     }
 
