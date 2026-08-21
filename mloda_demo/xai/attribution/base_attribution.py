@@ -6,7 +6,14 @@ from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
-from mloda.provider import BaseArtifact, DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda.provider import (
+    BaseArtifact,
+    DefaultOptionKeys,
+    FeatureChainParserMixin,
+    FeatureGroup,
+    FeatureSet,
+    property_spec,
+)
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
 from mloda_demo.xai.attribution.model_artifact import ModelArtifact
@@ -34,23 +41,11 @@ class AttributionFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     MIN_IN_FEATURES = 1
     MAX_IN_FEATURES: int | None = None
 
-    PROPERTY_MAPPING: ClassVar[dict[Any, dict[Any, Any]]] = {
-        MODEL_PATH: {
-            "explanation": "Path to the serialized model file",
-            DefaultOptionKeys.context: True,
-        },
-        XAI_METHOD: {
-            "explanation": "Attribution method name (e.g. LRP, DeepLift, GradCAM)",
-            DefaultOptionKeys.context: True,
-        },
-        TARGET_CLASS: {
-            "explanation": "Target class index for attribution (default: predicted class)",
-            DefaultOptionKeys.context: True,
-        },
-        DefaultOptionKeys.in_features: {
-            "explanation": "Source features for attribution (comma-separated)",
-            DefaultOptionKeys.context: True,
-        },
+    PROPERTY_MAPPING: ClassVar = {
+        MODEL_PATH: property_spec("Path to the serialized model file"),
+        XAI_METHOD: property_spec("Attribution method name (e.g. LRP, DeepLift, GradCAM)"),
+        TARGET_CLASS: property_spec("Target class index for attribution (default: predicted class)"),
+        DefaultOptionKeys.in_features: property_spec("Source features for attribution (comma-separated)"),
     }
 
     @staticmethod

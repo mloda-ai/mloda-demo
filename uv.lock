@@ -1112,13 +1112,10 @@ wheels = [
 
 [[package]]
 name = "mloda"
-version = "0.6.1"
+version = "0.11.1"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pyarrow" },
-]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d5/92/b2b98f60f38499c69263e0118d1fdf1a7e116d4c328ef8bd09eaf708ea56/mloda-0.6.1-py3-none-any.whl", hash = "sha256:81e0336fc3c2d6888d12aae52f5f31917ceca1b8b1aadfdd996fc05b623345e1", size = 402433, upload-time = "2026-04-09T10:23:43.872Z" },
+    { url = "https://files.pythonhosted.org/packages/5f/17/97f3dc2df41f7d10e18540733d035a41f112245f9f74fbdb69885dac1535/mloda-0.11.1-py3-none-any.whl", hash = "sha256:344c1dc1aef0f4bc7f2de6c4d2ee598f66ca434a0ea690494cd1ca8a45716762", size = 544825, upload-time = "2026-08-19T15:31:28.091Z" },
 ]
 
 [[package]]
@@ -1154,7 +1151,7 @@ dev = [
 requires-dist = [
     { name = "bandit", marker = "extra == 'dev'" },
     { name = "matplotlib" },
-    { name = "mloda", specifier = ">=0.5.4" },
+    { name = "mloda", specifier = ">=0.11.1,<0.12.0" },
     { name = "mloda-testing", specifier = ">=0.2.11" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },

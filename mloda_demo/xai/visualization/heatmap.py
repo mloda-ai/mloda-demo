@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from mloda.core.abstract_plugins.components.feature_name import FeatureName
 from mloda.core.abstract_plugins.components.options import Options
-from mloda.provider import DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda.provider import DefaultOptionKeys, FeatureChainParserMixin, FeatureGroup, FeatureSet, property_spec
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
 
@@ -28,21 +28,10 @@ class HeatmapFeatureGroup(FeatureChainParserMixin, FeatureGroup):
     COLORMAP = "colormap"
     TITLE = "title"
 
-    PROPERTY_MAPPING: ClassVar[dict[Any, dict[Any, Any]]] = {
-        COLORMAP: {
-            "explanation": "Matplotlib colormap name (default: RdBu_r)",
-            DefaultOptionKeys.context: True,
-            DefaultOptionKeys.default: "RdBu_r",
-        },
-        TITLE: {
-            "explanation": "Title displayed above the heatmap",
-            DefaultOptionKeys.context: True,
-            DefaultOptionKeys.default: "Heatmap",
-        },
-        DefaultOptionKeys.in_features: {
-            "explanation": "Source column containing per-row attribution lists",
-            DefaultOptionKeys.context: True,
-        },
+    PROPERTY_MAPPING: ClassVar = {
+        COLORMAP: property_spec("Matplotlib colormap name (default: RdBu_r)", default="RdBu_r"),
+        TITLE: property_spec("Title displayed above the heatmap", default="Heatmap"),
+        DefaultOptionKeys.in_features: property_spec("Source column containing per-row attribution lists"),
     }
 
     @classmethod
