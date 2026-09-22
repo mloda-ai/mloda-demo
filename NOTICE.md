@@ -6,6 +6,6 @@ of the License at:
 
        http://www.apache.org/licenses/LICENSE-2.0
 
-Third-party components keep their own licenses: mloda, mloda-registry, mloda-plugin-template
-(Apache 2.0); PyTorch (BSD 3-Clause); Zennit (LGPLv3+); OpenML German Credit dataset
-(see https://www.openml.org/ for terms).
+Third-party components keep their own licenses: mloda, mloda-registry, mloda-plugin-template,
+marimo, OpenTelemetry (Apache 2.0); PyTorch (BSD 3-Clause); Zennit (LGPLv3+); OpenML German
+Credit dataset (see https://www.openml.org/ for terms).
