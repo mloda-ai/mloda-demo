@@ -11,11 +11,13 @@ Live demos built on mloda, one per talk.
 ```bash
 uv venv
 source .venv/bin/activate
-uv sync --all-extras   # every demo plus dev tools
-uv sync                # light install: no PyTorch, enough for the Physical AI demo
 ```
 
-Run all checks with `tox`. Run integration tests with `pytest -m slow`.
+Then pick one:
+
+- Everything, including dev tools: `uv sync --all-extras`. Run all checks with `tox`, integration tests with `pytest -m slow`.
+- Credit risk only: `uv sync --extra credit-risk`.
+- Physical AI only (no PyTorch): `uv sync`.
 
 ## Demos
 
@@ -30,7 +32,7 @@ Mixed-source credit-risk pipeline: JSON + synthetic Excel + synthetic Markdown â
 ```bash
 which mloda-demo  # verify CLI is installed
 mloda-demo discover
-mloda-demo run --customer app-customer-c
+mloda-demo run duration credit_amount checking_status --customer app-customer-c
 mloda-demo predict --customer app-customer-c
 mloda-demo explain --customer app-customer-c
 ```
