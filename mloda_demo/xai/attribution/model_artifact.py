@@ -14,10 +14,6 @@ class ModelArtifact(BaseArtifact):
     """
 
     @classmethod
-    def custom_saver(cls, features: FeatureSet, artifact: Any) -> Any | None:
-        return artifact
-
-    @classmethod
     def load_model(cls, features: FeatureSet, artifact_key: str) -> dict[str, Any] | None:
         if features.artifact_to_load:
             artifacts = cls.custom_loader(features)
