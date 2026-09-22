@@ -29,4 +29,4 @@ jobs:
 
     - name: Run security scan with tox
       run: tox -e security
-      timeout-minutes: 2
+      timeout-minutes: 10
