@@ -21,7 +21,7 @@ resolution-markers = [
 ]
 
 [manifest]
-overrides = [{ name = "mloda-community-extenders-shared", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=bf2c7b19318cae8fb9a4bea24d7be6a090956550" }]
+overrides = [{ name = "mloda-community-extenders-shared", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3" }]
 
 [[package]]
 name = "anyio"
@@ -1631,7 +1631,7 @@ wheels = [
 [[package]]
 name = "mloda-community-extenders-shared"
 version = "0.4.7"
-source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=bf2c7b19318cae8fb9a4bea24d7be6a090956550#bf2c7b19318cae8fb9a4bea24d7be6a090956550" }
+source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3#895167d4ccd6dd9b73e970d022d053bb86dadbd3" }
 dependencies = [
     { name = "mloda" },
 ]
@@ -1639,7 +1639,7 @@ dependencies = [
 [[package]]
 name = "mloda-community-otel"
 version = "0.4.7"
-source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=bf2c7b19318cae8fb9a4bea24d7be6a090956550#bf2c7b19318cae8fb9a4bea24d7be6a090956550" }
+source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3#895167d4ccd6dd9b73e970d022d053bb86dadbd3" }
 dependencies = [
     { name = "mloda" },
     { name = "mloda-community-extenders-shared" },
@@ -1688,7 +1688,7 @@ requires-dist = [
     { name = "marimo" },
     { name = "matplotlib" },
     { name = "mloda", specifier = ">=0.13.0,<0.14.0" },
-    { name = "mloda-community-otel", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=bf2c7b19318cae8fb9a4bea24d7be6a090956550" },
+    { name = "mloda-community-otel", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3" },
     { name = "mloda-testing", marker = "extra == 'dev'", specifier = ">=0.4.7" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },
