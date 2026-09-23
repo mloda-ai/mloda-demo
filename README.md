@@ -41,7 +41,13 @@ Run `mloda-demo --help` for all commands.
 
 ### Physical AI (Berlin Physical AI, ML, and CV Meetup 2026)
 
-Talk: *"One Pipeline, Any Device"*. One distance definition across logs, replay, and a new depth sensor, explained by an OpenTelemetry trace in a marimo notebook. In progress.
+Talk: *"One Pipeline, Any Device"*. One distance definition across logs, replay, and a new depth sensor, explained by an OpenTelemetry trace in a marimo notebook. No PyTorch needed.
+
+Two synthetic depth devices, no hardware: Device A logs float32 metres, Device B uint16 millimetres. Only the readers (`DepthReaderA`, `DepthReaderB`) are device-specific; `DepthToMetres`, `Calibration`, `NearestDistance` and `BrakeRule` are one shared definition.
+
+```bash
+marimo edit notebooks/physical_ai.py
+```
 
 ## Structure
 
@@ -53,8 +59,10 @@ mloda_demo/
 ├── xai/
 │   ├── attribution/              # Zennit LRP + Gradient attribution FGs
 │   └── visualization/            # heatmap renderer
-demo_data/                        # customer data + trained artifacts
-tests/                            # unit + integration CLI tests
+├── physical_ai/                  # readers, shared definition, runner, trace, plot
+demo_data/                        # customer data + trained artifacts; physical_ai/ depth logs
+notebooks/                        # marimo notebook for the Physical AI talk
+tests/                            # unit + integration tests
 ```
 
 ## Open Source Libraries

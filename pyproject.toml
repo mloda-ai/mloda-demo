@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mloda-demo"
 version = "0.1.0"
-description = "Live demos built on mloda: credit risk with XAI attribution, and Physical AI sensor features with OpenTelemetry traces (in progress)."
+description = "Live demos built on mloda: credit risk with XAI attribution, and Physical AI sensor features with OpenTelemetry traces."
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
@@ -53,6 +53,10 @@ markers = [
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint.per-file-ignores]
+# marimo writes a bare `return` at the end of every cell.
+"notebooks/*" = ["PLR1711"]
+
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
@@ -61,6 +65,7 @@ explicit_package_bases = true
 exclude = [
     "^scripts/",
     "^demo/",
+    "^notebooks/",
     "^\\.tox/",
     "^\\.venv/",
 ]
