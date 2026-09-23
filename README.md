@@ -49,7 +49,7 @@ Two synthetic depth devices, no hardware: Device A logs float32 metres, Device B
 marimo edit notebooks/physical_ai.py
 ```
 
-The notebook, plots and talk slides (`slides/physical_ai.pdf`) use the mloda.ai colours and fonts, embedded so everything works offline.
+The notebook, plots and talk slides (`slides/physical_ai.pdf`) use the mloda.ai colours with system fonts, and work offline.
 
 ## Structure
 

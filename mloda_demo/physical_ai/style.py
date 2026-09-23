@@ -1,15 +1,8 @@
-"""mloda.ai design tokens for the Physical AI plots; `notebooks/physical_ai.css` mirrors the colours."""
+"""mloda.ai colours for the Physical AI plots; `notebooks/physical_ai.css` mirrors them."""
 
 from __future__ import annotations
 
-from functools import cache
-from pathlib import Path
 from typing import Any
-
-from matplotlib import font_manager
-
-# Static 400 instance of the mloda.ai woff2 (fontTools varLib.instancer): matplotlib cannot read woff2.
-FONTS = Path(__file__).parent / "fonts"
 
 GREEN = "#23A455"
 GREEN_STRONG = "#12813C"  # green text on white, and white text on green
@@ -26,7 +19,6 @@ RED_STRONG = "#B91C1C"  # red text
 
 # Any keys: matplotlib 3.11 types rc keys as literals, 3.10 as str.
 MATPLOTLIB: dict[Any, Any] = {
-    "font.family": "Schibsted Grotesk",
     "font.size": 11,
     "text.color": INK,
     "axes.edgecolor": MUTED,
@@ -40,9 +32,3 @@ MATPLOTLIB: dict[Any, Any] = {
     "xtick.labelcolor": MUTED,
     "ytick.labelcolor": MUTED,
 }
-
-
-@cache
-def register_fonts() -> None:
-    for path in sorted(FONTS.glob("*.ttf")):
-        font_manager.fontManager.addfont(str(path))

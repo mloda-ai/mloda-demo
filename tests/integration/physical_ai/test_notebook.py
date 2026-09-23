@@ -62,9 +62,7 @@ def _contrast(foreground: str, background: str) -> float:
 def test_notebook_css_and_slides_work_offline_and_mirror_the_palette() -> None:
     assert f'css_file="{CSS.name}"' in NOTEBOOK.read_text()
     css = CSS.read_text()
-    rest = re.sub(r'url\("data:font/woff2;base64,[A-Za-z0-9+/=]+"\)', "", css) + SLIDES.read_text()
-    assert not any(remote in rest for remote in ("url(", "@import", "http"))
-    assert re.findall(r'font-family: "([^"]+)";', css) == ["Schibsted Grotesk", "Bricolage Grotesque", "DM Mono"]
+    assert not any(remote in css + SLIDES.read_text() for remote in ("url(", "@import", "http"))
     tokens = dict(re.findall(r"--mloda-([a-z-]+): (#[0-9A-F]{6});", css))
     assert tokens == {
         "green": style.GREEN,

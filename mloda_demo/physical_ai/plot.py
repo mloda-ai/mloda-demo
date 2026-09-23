@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Circle
 
 from mloda_demo.physical_ai.definition import BRAKE_THRESHOLD_M
-from mloda_demo.physical_ai.style import GREEN, INK, MATPLOTLIB, MUTED, RED, register_fonts
+from mloda_demo.physical_ai.style import GREEN, INK, MATPLOTLIB, MUTED, RED
 
 RANGE_M = 13.0
 BRAKE_COLOUR = RED
@@ -20,7 +20,6 @@ CLEAR_COLOUR = GREEN
 @matplotlib.rc_context(MATPLOTLIB)
 def top_down(points: pd.DataFrame, *, ghost: tuple[float, float] | None = None, title: str = "") -> Figure:
     """Objects at their nearest point (x forward, y left); objects beyond the axes sit on the edge with their distance."""
-    register_fonts()
     figure = Figure(figsize=(5, 5))
     axes = figure.subplots()
     axes.add_patch(Circle((0.0, 0.0), BRAKE_THRESHOLD_M, color=BRAKE_COLOUR, alpha=0.12))
