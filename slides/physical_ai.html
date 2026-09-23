@@ -1,0 +1,98 @@
+<!doctype html>
+<!-- Talk slides: hook and close. PDF: headless Chromium, --print-to-pdf=physical_ai.pdf --no-pdf-header-footer --font-render-hinting=none. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>One Pipeline, Any Device</title>
+<link rel="stylesheet" href="../notebooks/physical_ai.css">
+<style>
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--mloda-sans);
+    color: var(--mloda-ink);
+    background: var(--mloda-page);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slide {
+    position: relative;
+    box-sizing: border-box;
+    width: 1920px;
+    height: 1080px;
+    padding: 56px;
+    overflow: hidden;
+    break-after: page;
+  }
+  .slide:last-child { break-after: auto; }
+  .panel {
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    height: 100%;
+    padding: 0 160px;
+    border-radius: 24px;
+    background: var(--mloda-panel);
+    color: var(--mloda-on-dark);
+  }
+  h1 {
+    margin: 0;
+    font-size: 124px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.04;
+  }
+  code { font-family: var(--mloda-mono); font-weight: 400; letter-spacing: 0; }
+  .panel code { color: var(--mloda-green); }
+  .close { display: grid; grid-template-columns: 1fr 520px; gap: 96px; align-items: center; padding: 120px 136px; }
+  .close h2 { margin: 0; font-size: 84px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.08; text-wrap: balance; }
+  .chips { display: flex; flex-wrap: wrap; gap: 16px; margin: 40px 0 56px; }
+  .chip {
+    padding: 14px 24px;
+    border: 1px solid rgba(15, 23, 32, .12);
+    border-radius: 8px;
+    background: var(--mloda-card);
+    font-family: var(--mloda-mono);
+    font-size: 40px;
+  }
+  .close p { margin: 0; font-size: 56px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.15; color: var(--mloda-green-strong); }
+  .card { padding: 40px; border-radius: 16px; background: var(--mloda-card); text-align: center; }
+  .card svg { display: block; width: 440px; height: 440px; border-radius: 8px; }
+  .card span { display: block; margin-top: 24px; font-family: var(--mloda-mono); font-size: 23px; white-space: nowrap; }
+  .wordmark { position: absolute; left: 136px; bottom: 72px; width: 221px; height: 96px; color: var(--mloda-ink); }
+</style>
+</head>
+<body>
+
+<section class="slide">
+  <div class="panel">
+    <h1>Nothing defines what <code>distance</code> is.</h1>
+  </div>
+</section>
+
+<section class="slide close">
+  <div>
+    <h2>Distance now has a definition:</h2>
+    <div class="chips">
+      <span class="chip">metres</span>
+      <span class="chip">camera frame</span>
+      <span class="chip">calibration version</span>
+      <span class="chip">source log</span>
+    </div>
+    <p>One definition, computed wherever the data shows up.</p>
+  </div>
+  <div class="card">
+    <svg viewBox="-4 -4 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code: github.com/mloda-ai/mloda-demo">
+      <rect x="-4" y="-4" width="37" height="37" fill="#FFFFFF"/>
+      <path stroke="#0E120F" d="M0 0.5h7m1 0h4m2 0h1m2 0h2m3 0h7m-29 1h1m5 0h1m4 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h1m1 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h2m1 0h2m2 0h3m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m4 0h1m2 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h1m1 0h2m7 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-19 1h3m1 0h1m1 0h1m1 0h1m1 0h1m-21 1h1m1 0h1m3 0h2m1 0h2m2 0h4m1 0h1m1 0h1m2 0h1m2 0h1m1 0h1m-28 1h3m1 0h1m1 0h2m1 0h1m1 0h1m2 0h3m1 0h5m3 0h2m-27 1h2m2 0h1m1 0h1m4 0h3m1 0h1m1 0h1m2 0h5m1 0h1m-28 1h3m1 0h1m3 0h2m5 0h1m1 0h1m1 0h2m2 0h2m-23 1h1m2 0h1m1 0h2m1 0h4m1 0h1m3 0h1m1 0h2m4 0h1m-29 1h1m1 0h4m1 0h1m2 0h4m1 0h1m3 0h2m1 0h2m3 0h2m-29 1h3m3 0h1m1 0h5m2 0h1m1 0h3m1 0h4m3 0h1m-29 1h1m2 0h1m3 0h1m1 0h2m2 0h1m4 0h3m1 0h2m-24 1h2m2 0h1m1 0h1m1 0h2m3 0h1m1 0h2m3 0h3m5 0h1m-27 1h1m2 0h1m4 0h3m2 0h3m1 0h1m2 0h2m2 0h3m-29 1h3m1 0h6m1 0h1m1 0h7m4 0h2m2 0h1m-22 1h4m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m-25 1h3m3 0h1m2 0h1m1 0h1m1 0h4m1 0h1m1 0h6m1 0h1m-20 1h2m1 0h7m2 0h1m3 0h3m1 0h1m-29 1h7m1 0h1m2 0h1m3 0h1m4 0h1m1 0h1m1 0h1m3 0h1m-29 1h1m5 0h1m4 0h3m1 0h2m1 0h3m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m3 0h2m1 0h1m2 0h1m2 0h7m2 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m3 0h3m1 0h3m2 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m2 0h6m3 0h1m2 0h1m2 0h2m-29 1h1m5 0h1m3 0h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h3m-26 1h7m1 0h3m5 0h1m3 0h1m3 0h2m2 0h1"/>
+    </svg>
+    <span>github.com/mloda-ai/mloda-demo</span>
+  </div>
+  <svg class="wordmark" viewBox="0 0 221 96" role="img" aria-label="mloda">
+    <path fill="currentColor" d="M4.69 70V34.14H14.25V39.91Q15.82 36.79 18.6 35.03Q21.37 33.27 25.09 33.27Q28.83 33.27 31.41 35.12Q34 36.97 35.26 40.5Q37.26 36.79 40.3 35.03Q43.33 33.27 46.8 33.27Q52.22 33.27 55.13 37.11Q58.03 40.94 58.03 48.13V70H48.14V48.02Q48.14 45.99 47.73 44.35Q47.32 42.71 46.29 41.73Q45.25 40.74 43.32 40.74Q41.04 40.74 39.47 42.23Q37.9 43.72 37.1 46.33Q36.3 48.94 36.3 52.34V70H26.41V48.02Q26.41 45.99 26 44.34Q25.6 42.69 24.56 41.72Q23.52 40.74 21.62 40.74Q19.35 40.74 17.77 42.22Q16.19 43.69 15.39 46.31Q14.58 48.93 14.58 52.36V70Z M72.89 70Q68.88 70 66.75 68.06Q64.62 66.12 64.62 62.47V20.2H74.51V60.9Q74.51 62.01 74.82 62.38Q75.14 62.75 76.17 62.75H78.93V70Z M98.93 70.87Q93.52 70.87 89.38 68.48Q85.25 66.1 82.93 61.86Q80.62 57.62 80.62 52.06Q80.62 46.51 82.93 42.27Q85.25 38.04 89.38 35.65Q93.51 33.27 98.93 33.27Q104.37 33.27 108.5 35.65Q112.63 38.04 114.95 42.27Q117.28 46.5 117.28 52.07Q117.28 57.63 114.96 61.87Q112.64 66.1 108.49 68.49Q104.35 70.87 98.93 70.87ZM98.95 63.58Q102.65 63.58 104.79 60.49Q106.93 57.39 106.93 52.07Q106.93 46.74 104.79 43.65Q102.65 40.56 98.95 40.56Q95.24 40.56 93.11 43.65Q90.97 46.74 90.97 52.07Q90.97 57.41 93.11 60.49Q95.25 63.58 98.95 63.58Z M135.59 70.87Q131.09 70.87 127.77 68.62Q124.45 66.36 122.66 62.14Q120.86 57.91 120.86 52Q120.86 46.09 122.67 41.9Q124.49 37.71 127.82 35.49Q131.14 33.27 135.74 33.27Q139.7 33.27 142.81 35.1Q145.92 36.94 147.85 41.1L146.84 41.16V20.2H156.74V70H147.36V62.79L147.47 63.3Q145.68 67.18 142.58 69.03Q139.48 70.87 135.59 70.87ZM139.19 63.38Q141.51 63.38 143.35 62.15Q145.19 60.92 146.26 58.41Q147.33 55.9 147.33 52.13Q147.33 46.46 145 43.6Q142.67 40.74 139.27 40.74Q135.68 40.74 133.51 43.77Q131.34 46.8 131.34 52.21Q131.34 57.47 133.44 60.42Q135.53 63.38 139.19 63.38Z M174.26 70.85Q170.82 70.85 167.93 69.65Q165.04 68.45 163.3 66.05Q161.56 63.65 161.56 60.07Q161.56 56.22 163.79 53.52Q166.03 50.83 170.27 49.42Q174.5 48.01 180.53 48.01H185.57L184.98 48.92V46.85Q184.98 43.3 183.69 41.56Q182.4 39.83 179.41 39.83Q176.54 39.83 175.03 41.34Q173.51 42.85 173.18 45.64L163.11 43.89Q163.65 40.91 165.66 38.5Q167.67 36.09 171.23 34.66Q174.79 33.23 179.97 33.23Q184.71 33.23 188 34.75Q191.29 36.26 193 39.65Q194.71 43.05 194.71 48.72V60.9Q194.71 62.02 195.03 62.38Q195.34 62.75 196.37 62.75H197.99V70H193.27Q189.41 70 187.39 68.05Q185.37 66.1 185.37 62.47V60.79L187.11 61.44Q186.67 62.87 185.83 64.49Q185 66.11 183.53 67.56Q182.07 69.01 179.8 69.93Q177.54 70.85 174.26 70.85ZM177.1 64.1Q179.43 64.1 181.22 63.03Q183.01 61.96 184.04 59.82Q185.06 57.69 185.06 54.51V53.73H180.88Q177.34 53.73 175.36 54.66Q173.38 55.59 172.59 56.93Q171.79 58.26 171.79 59.55Q171.79 60.55 172.27 61.61Q172.74 62.66 173.9 63.38Q175.05 64.1 177.1 64.1Z"/>
+    <path fill="#23A455" d="M208.6 70.87Q205.54 70.87 203.65 68.98Q201.77 67.09 201.77 64.04Q201.77 60.98 203.65 59.1Q205.54 57.21 208.6 57.21Q211.65 57.21 213.54 59.1Q215.43 60.98 215.43 64.04Q215.43 67.09 213.54 68.98Q211.65 70.87 208.6 70.87Z"/>
+  </svg>
+</section>
+
+</body>
+</html>

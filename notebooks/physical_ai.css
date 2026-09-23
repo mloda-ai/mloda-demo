@@ -1,0 +1,139 @@
+/*
+ * mloda.ai look (app/v2.css) for the Physical AI notebook and slides, with system fonts.
+ * Colours mirror mloda_demo/physical_ai/style.py.
+ */
+
+:root,
+.marimo {
+  --mloda-green: #23A455;
+  --mloda-green-strong: #12813C;
+  --mloda-ink: #0E120F;
+  --mloda-muted: #6A6C6A;
+  --mloda-page: #FFFFFF;
+  --mloda-card: #F5F7F9;
+  --mloda-panel: #0F1611;
+  --mloda-code: #18201A;
+  --mloda-on-dark: #F4F7F4;
+  --mloda-highlight: #FAD689;
+  --mloda-red: #EF4444;
+  --mloda-red-strong: #B91C1C;
+  --mloda-sans: Helvetica, Arial, sans-serif;
+  --mloda-mono: Menlo, Consolas, monospace;
+
+  --marimo-text-font: var(--mloda-sans);
+  --marimo-heading-font: var(--mloda-sans);
+  --marimo-monospace-font: var(--mloda-mono);
+  --foreground: var(--mloda-ink);
+  --primary: var(--mloda-green-strong);
+  --link: var(--mloda-green-strong);
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3 {
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+  color: var(--mloda-ink);
+}
+
+/* UI elements render in shadow roots; marimo copies this stylesheet into them. */
+button[data-testid="marimo-plugin-button"] {
+  height: auto;
+  padding: 8px 22px;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+  background: var(--mloda-green-strong);
+  color: #FFFFFF;
+  font-family: var(--mloda-sans);
+  font-size: 1rem;
+  font-weight: 600;
+}
+button[data-testid="marimo-plugin-button"] .markdown {
+  font: inherit;
+}
+button[data-testid="marimo-plugin-button"]:hover {
+  background: var(--mloda-green-strong);
+  opacity: 0.85;
+}
+[data-testid="range"] {
+  background: var(--mloda-green);
+}
+[data-testid="thumb"] {
+  border-color: var(--mloda-green);
+}
+
+.admonition.success,
+.admonition.danger {
+  padding: 16px 20px;
+  border: 0;
+  border-left: 6px solid;
+  border-radius: 16px;
+  color: var(--mloda-ink);
+  font-size: 1.25rem;
+}
+.admonition.success {
+  border-left-color: var(--mloda-green);
+  background: #E4F2DF;
+}
+.admonition.danger {
+  border-left-color: var(--mloda-red);
+  background: #FDECEC;
+}
+
+table.dataframe {
+  width: fit-content;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 16px;
+  background: var(--mloda-card);
+}
+table.dataframe th,
+table.dataframe td {
+  padding: 0.3em 0.8em;
+  border: 0;
+  font-family: var(--mloda-sans);
+}
+/* Outranks marimo's striped rows. */
+table.dataframe tbody tr:nth-child(n) {
+  background: none;
+}
+table.dataframe td.brake {
+  color: var(--mloda-red-strong);
+  font-weight: 700;
+}
+
+pre.trace {
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: var(--mloda-code);
+  color: var(--mloda-on-dark);
+  font-family: var(--mloda-mono);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+pre.trace mark {
+  padding: 0 0.2em;
+  border-radius: 4px;
+  background: var(--mloda-highlight);
+  color: var(--mloda-ink);
+}
+
+.markdown .codehilite {
+  border-radius: 16px;
+  background: var(--mloda-code);
+}
+.markdown .codehilite pre,
+.markdown .codehilite code {
+  background: none;
+  color: var(--mloda-on-dark);
+  font-family: var(--mloda-mono);
+}
+.markdown .codehilite .gd {
+  color: #F87171;
+}
+.markdown .codehilite .gi {
+  color: #4FC578;
+}

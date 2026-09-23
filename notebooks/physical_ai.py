@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.24.2"
-app = marimo.App(width="medium")
+app = marimo.App(width="medium", css_file="physical_ai.css")
 
 
 @app.cell(hide_code=True)
@@ -9,7 +9,7 @@ def _():
     import marimo as mo
 
     from mloda_demo.physical_ai.definition import ASSUMED_UNITS, FAULTY_UNITS
-    from mloda_demo.physical_ai.plot import BRAKE_COLOUR, top_down
+    from mloda_demo.physical_ai.plot import top_down
     from mloda_demo.physical_ai.readers import DepthReaderA, DepthReaderB
     from mloda_demo.physical_ai.runner import (
         FEATURES,
@@ -27,7 +27,6 @@ def _():
     SCRIPT = mo.app_meta().mode == "script"
     return (
         ASSUMED_UNITS,
-        BRAKE_COLOUR,
         DepthReaderA,
         DepthReaderB,
         FAULTY_UNITS,
@@ -47,7 +46,7 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(BRAKE_COLOUR, FOCUS_OBJECT, all_passed, mo, n_table, nearest_points, top_down):
+def _(FOCUS_OBJECT, all_passed, mo, n_table, nearest_points, top_down):
     def badge(runs):
         columns = ", ".join(runs)
         if all_passed(runs.values()):
@@ -56,7 +55,7 @@ def _(BRAKE_COLOUR, FOCUS_OBJECT, all_passed, mo, n_table, nearest_points, top_d
 
     def table_view(runs):
         html = n_table(runs).to_html(border=0)
-        html = html.replace("<td>NO</td>", f'<td style="color:{BRAKE_COLOUR};font-weight:700">NO</td>')
+        html = html.replace("<td>NO</td>", '<td class="brake">NO</td>')
         return mo.Html(f'<div style="font-size:1.6em">{html}</div>')
 
     def comparison(runs):
