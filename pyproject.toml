@@ -39,6 +39,15 @@ dev = [
     "bandit",
 ]
 
+# Load spans and declared span attributes are not released yet; switch back to PyPI after the next registry release.
+[tool.uv.sources]
+mloda-community-otel = { git = "https://github.com/mloda-ai/mloda-registry", rev = "bf2c7b19318cae8fb9a4bea24d7be6a090956550", subdirectory = "mloda/community/extenders/otel" }
+
+[tool.uv]
+override-dependencies = [
+    "mloda-community-extenders-shared @ git+https://github.com/mloda-ai/mloda-registry@bf2c7b19318cae8fb9a4bea24d7be6a090956550#subdirectory=mloda/community/extenders/shared",
+]
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["mloda_demo*"]
