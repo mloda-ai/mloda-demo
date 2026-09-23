@@ -52,6 +52,13 @@ override-dependencies = [
 where = ["."]
 include = ["mloda_demo*"]
 
+[tool.setuptools.package-data]
+"mloda_demo.physical_ai" = ["fonts/*"]
+
+# notebooks/physical_ai.css styles the light theme only.
+[tool.marimo.display]
+theme = "light"
+
 [tool.pytest.ini_options]
 testpaths = ["mloda_demo", "tests"]
 python_files = ["test_*.py"]

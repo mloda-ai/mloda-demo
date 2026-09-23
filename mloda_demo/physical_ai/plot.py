@@ -4,25 +4,29 @@ from __future__ import annotations
 
 import math
 
+import matplotlib
 import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.patches import Circle
 
 from mloda_demo.physical_ai.definition import BRAKE_THRESHOLD_M
+from mloda_demo.physical_ai.style import GREEN, INK, MATPLOTLIB, MUTED, RED, register_fonts
 
 RANGE_M = 13.0
-BRAKE_COLOUR = "#EF4444"
-CLEAR_COLOUR = "#23A455"
+BRAKE_COLOUR = RED
+CLEAR_COLOUR = GREEN
 
 
+@matplotlib.rc_context(MATPLOTLIB)
 def top_down(points: pd.DataFrame, *, ghost: tuple[float, float] | None = None, title: str = "") -> Figure:
     """Objects at their nearest point (x forward, y left); objects beyond the axes sit on the edge with their distance."""
+    register_fonts()
     figure = Figure(figsize=(5, 5))
     axes = figure.subplots()
     axes.add_patch(Circle((0.0, 0.0), BRAKE_THRESHOLD_M, color=BRAKE_COLOUR, alpha=0.12))
-    axes.plot(0.0, 0.0, marker="^", color="black", markersize=10, clip_on=False)
+    axes.plot(0.0, 0.0, marker="^", color=INK, markersize=10, clip_on=False)
     if ghost is not None:
-        axes.scatter(-ghost[1], ghost[0], s=160, facecolors="none", edgecolors="grey", alpha=0.6, linestyles="--")
+        axes.scatter(-ghost[1], ghost[0], s=160, facecolors="none", edgecolors=MUTED, linestyles="--")
     for object_id, point in points.iterrows():
         across, forward = -float(point["y_m"]), float(point["x_m"])
         colour = BRAKE_COLOUR if point["brake"] else CLEAR_COLOUR

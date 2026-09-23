@@ -49,6 +49,8 @@ Two synthetic depth devices, no hardware: Device A logs float32 metres, Device B
 marimo edit notebooks/physical_ai.py
 ```
 
+The notebook, plots and talk slides (`slides/physical_ai.pdf`) use the mloda.ai colours and fonts, embedded so everything works offline.
+
 ## Structure
 
 ```
@@ -59,9 +61,10 @@ mloda_demo/
 ├── xai/
 │   ├── attribution/              # Zennit LRP + Gradient attribution FGs
 │   └── visualization/            # heatmap renderer
-├── physical_ai/                  # readers, shared definition, runner, trace, plot
+├── physical_ai/                  # readers, shared definition, runner, trace, plot, style
 demo_data/                        # customer data + trained artifacts; physical_ai/ depth logs
-notebooks/                        # marimo notebook for the Physical AI talk
+notebooks/                        # marimo notebook and its CSS for the Physical AI talk
+slides/                           # hook and close slides for the Physical AI talk (HTML source + PDF)
 tests/                            # unit + integration tests
 ```
 

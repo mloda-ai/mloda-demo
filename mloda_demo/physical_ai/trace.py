@@ -130,4 +130,4 @@ def trace_html(result: Run, object_id: int = FOCUS_OBJECT) -> str:
     for line in trace_lines(result, object_id):
         for mark in line.marks:
             text = text.replace(html.escape(mark), f"<mark>{html.escape(mark)}</mark>", 1)
-    return f"<pre>{text}</pre>"
+    return f'<pre class="trace">{text}</pre>'

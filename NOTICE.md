@@ -8,4 +8,5 @@ of the License at:
 
 Third-party components keep their own licenses: mloda, mloda-registry, mloda-plugin-template,
 marimo, OpenTelemetry (Apache 2.0); PyTorch (BSD 3-Clause); Zennit (LGPLv3+); OpenML German
-Credit dataset (see https://www.openml.org/ for terms).
+Credit dataset (see https://www.openml.org/ for terms); Schibsted Grotesk, Bricolage Grotesque
+and DM Mono fonts (SIL OFL 1.1, see mloda_demo/physical_ai/fonts/OFL.txt).
