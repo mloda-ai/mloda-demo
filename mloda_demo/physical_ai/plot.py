@@ -20,7 +20,7 @@ def top_down(points: pd.DataFrame, *, ghost: tuple[float, float] | None = None, 
     figure = Figure(figsize=(5, 5))
     axes = figure.subplots()
     axes.add_patch(Circle((0.0, 0.0), BRAKE_THRESHOLD_M, color=BRAKE_COLOUR, alpha=0.12))
-    axes.plot(0.0, 0.0, marker="^", color="black", markersize=10)
+    axes.plot(0.0, 0.0, marker="^", color="black", markersize=10, clip_on=False)
     if ghost is not None:
         axes.scatter(-ghost[1], ghost[0], s=160, facecolors="none", edgecolors="grey", alpha=0.6, linestyles="--")
     for object_id, point in points.iterrows():

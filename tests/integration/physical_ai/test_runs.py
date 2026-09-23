@@ -61,6 +61,7 @@ def test_check_fails_the_broken_setup_before_any_number() -> None:
     assert result.error == "DepthToMetres assumes uint16 depth in cm, but DepthReaderB delivers mm"
     assert result.table.empty
     assert not all_passed([result])
+    assert list(n_table({"device B": result})["device B"]) == ["error", "error"]
 
 
 def test_check_passes_the_fixed_setup() -> None:

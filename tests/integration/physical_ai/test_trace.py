@@ -15,7 +15,7 @@ def test_trace_follows_the_data_flow_and_marks_the_unit_mismatch() -> None:
     assert convert.detail == "assumes cm: 1200 x 0.01 = 12 m"
     assert (calibrate.context, calibrate.detail) == ("calib 2026-09-01", "frame camera_optical -> base_link")
     assert (distance.context, distance.detail) == ("unit m", "object 7: 12 m")
-    assert (brake.context, brake.detail) == ("threshold 2.0 m", "object 7: no brake")
+    assert (brake.context, brake.detail) == ("threshold 2 m", "object 7: no brake")
     assert (reader.marks, convert.marks) == (("unit mm",), ("assumes cm",))
 
 
@@ -23,6 +23,7 @@ def test_fixed_trace_has_nothing_to_mark() -> None:
     lines = trace_lines(run(DepthReaderB))
     assert lines[1].detail == "assumes mm: 1200 x 0.001 = 1.2 m"
     assert all(not line.marks for line in lines)
+    assert lines[0].version != trace_lines(run(DepthReaderA))[0].version
 
 
 def test_trace_adds_a_line_for_a_new_feature() -> None:

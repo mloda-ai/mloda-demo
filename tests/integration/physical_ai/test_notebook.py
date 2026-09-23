@@ -25,6 +25,13 @@ def test_every_beat_runs_with_the_new_vendor_line_changed() -> None:
     assert defs["checked"].error == "DepthToMetres assumes uint16 depth in cm, but DepthReaderB delivers mm"
 
 
+def test_the_fix_brings_every_column_back_to_brake() -> None:
+    _, defs = _notebook().app.run(defs={"reader": DepthReaderB, "fault": False})
+    table = defs["n_table"](defs["runs"])
+    assert list(table.loc["object 7"]) == ["1.2 m", "1.2 m", "1.2 m"]
+    assert list(table.loc["brake"]) == ["yes", "yes", "yes"]
+
+
 def test_physical_ai_code_never_imports_torch() -> None:
     script = (
         "import runpy, sys\n"

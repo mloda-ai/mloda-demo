@@ -53,7 +53,8 @@ def run(
         group["replay_until"] = replay_until
     if check_units:
         # The conversion's declared units travel with the request, so the reader refuses a mismatch at plan time.
-        group["assumed_units"] = tuple(sorted(DepthToMetres.assumed_units(fault).items()))
+        units = tuple(sorted(DepthToMetres.assumed_units(fault).items()))
+        group["assumed_units"] = (DepthToMetres.get_class_name(), units)
     try:
         frames = mloda.run_all(
             [Feature(name, Options(group=dict(group))) for name in features],
@@ -64,18 +65,20 @@ def run(
     except FeatureResolutionError as error:
         return Run(label, reader, pd.DataFrame(), tuple(exporter.get_finished_spans()), rejection(error))
     # A linear pandas chain keeps row order, so the per-step frames line up.
-    table = pd.concat([frame.reset_index(drop=True) for frame in frames], axis=1)
+    if any(not frame.index.equals(frames[0].index) for frame in frames):
+        raise ValueError("per-step result frames are not row-aligned")
+    table = pd.concat(list(frames), axis=1)
     return Run(label, reader, table, tuple(exporter.get_finished_spans()))
 
 
 def compare(
     reader: type[DepthLogReader], *, fault: bool = False, frame: int | None = None, features: Iterable[str] = FEATURES
 ) -> dict[str, Run]:
-    """The n-table's contexts: Device A logs offline, Device A replayed online up to a frame, and the given reader."""
+    """The n-table's contexts, one definition: Device A logs offline, Device A replayed online, and the given reader."""
     features = tuple(features)
     return {
-        "offline": run(DepthReaderA, features=features),
-        "online": run(DepthReaderA, label="online", replay_until=frame, features=features),
+        "offline": run(DepthReaderA, fault=fault, features=features),
+        "online": run(DepthReaderA, label="online", fault=fault, replay_until=frame, features=features),
         reader.label: run(reader, label=reader.label, fault=fault, features=features),
     }
 

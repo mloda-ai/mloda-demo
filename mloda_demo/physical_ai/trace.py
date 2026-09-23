@@ -75,7 +75,7 @@ def trace_lines(result: Run, object_id: int = FOCUS_OBJECT) -> list[TraceLine]:
             source = PurePath(str(_attributes(load).get("mloda.data_access.identity", "?"))).name if load else "?"
             name = str(_attributes(load).get("mloda.data_access.format", step)) if load else step
             detail = f"raw {raw:g} ({result.table['depth_raw'].dtype}, unit {unit})"
-            lines.append(TraceLine(role, name, version, f"src {source}", detail))
+            lines.append(TraceLine(role, name, str(reader.get("version", version)), f"src {source}", detail))
         elif role == "convert":
             assumed = str(declared.get(f"assumes.{encoding}", "?"))
             factor = TO_METRES.get(assumed)
@@ -93,7 +93,9 @@ def trace_lines(result: Run, object_id: int = FOCUS_OBJECT) -> list[TraceLine]:
             lines.append(TraceLine(role, step, version, f"unit {declared.get('unit', '?')}", detail))
         elif role == "brake":
             detail = f"object {object_id}: {'brake' if focus['brake'] else 'no brake'}"
-            lines.append(TraceLine(role, step, version, f"threshold {declared.get('threshold_m', '?')} m", detail))
+            threshold = declared.get("threshold_m", "?")
+            threshold = f"{threshold:g}" if isinstance(threshold, float) else threshold
+            lines.append(TraceLine(role, step, version, f"threshold {threshold} m", detail))
         else:
             detail = f"approaching: {', '.join(map(str, approaching_objects(result))) or 'none'}"
             lines.append(TraceLine(role, step, version, f"min {declared.get('min_speed_mps', '?')} m/s", detail))

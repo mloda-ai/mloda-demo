@@ -7,7 +7,7 @@ from mloda.user import Options
 from mloda_demo.physical_ai.readers import DepthLog, DepthLogReader, DepthReaderA, DepthReaderB
 
 FeatureSetFactory = Callable[..., FeatureSet]
-MISMATCH = (("float32", "m"), ("uint16", "cm"))
+MISMATCH = ("DepthToMetres", (("float32", "m"), ("uint16", "cm")))
 
 
 def test_root_feature_group_reads_through_the_reader_family() -> None:
@@ -40,10 +40,12 @@ def test_load_data_replays_frames_up_to_the_given_one(feature_set: FeatureSetFac
     assert set(replay["frame"]) == {0}
 
 
-def test_readers_declare_unit_and_encoding() -> None:
-    assert DepthReaderB.declared_attributes(None) == {
+def test_readers_declare_unit_encoding_and_their_own_version() -> None:
+    declared = DepthReaderB.declared_attributes(None)
+    assert {key: declared[key] for key in ("unit", "encoding", "sensor", "frame")} == {
         "unit": "mm",
         "encoding": "uint16",
         "sensor": "device_b",
         "frame": "camera_optical",
     }
+    assert declared["version"] != DepthReaderA.declared_attributes(None)["version"]

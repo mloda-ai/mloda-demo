@@ -9,9 +9,17 @@ def _():
     import marimo as mo
 
     from mloda_demo.physical_ai.definition import ASSUMED_UNITS, FAULTY_UNITS
-    from mloda_demo.physical_ai.plot import top_down
+    from mloda_demo.physical_ai.plot import BRAKE_COLOUR, top_down
     from mloda_demo.physical_ai.readers import DepthReaderA, DepthReaderB
-    from mloda_demo.physical_ai.runner import FEATURES, all_passed, compare, n_table, nearest_points, run
+    from mloda_demo.physical_ai.runner import (
+        FEATURES,
+        FOCUS_OBJECT,
+        all_passed,
+        compare,
+        n_table,
+        nearest_points,
+        run,
+    )
     from mloda_demo.physical_ai.scene import TIMESTAMPS
     from mloda_demo.physical_ai.trace import trace_html
 
@@ -19,10 +27,12 @@ def _():
     SCRIPT = mo.app_meta().mode == "script"
     return (
         ASSUMED_UNITS,
+        BRAKE_COLOUR,
         DepthReaderA,
         DepthReaderB,
         FAULTY_UNITS,
         FEATURES,
+        FOCUS_OBJECT,
         SCRIPT,
         TIMESTAMPS,
         all_passed,
@@ -37,21 +47,27 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(all_passed, mo, n_table, nearest_points, top_down):
+def _(BRAKE_COLOUR, FOCUS_OBJECT, all_passed, mo, n_table, nearest_points, top_down):
     def badge(runs):
+        columns = ", ".join(runs)
         if all_passed(runs.values()):
-            return mo.callout(mo.md("**all runs passed**"), kind="success")
-        return mo.callout(mo.md("**a run failed**"), kind="danger")
+            return mo.callout(mo.md(f"**all runs passed**: {columns}"), kind="success")
+        return mo.callout(mo.md(f"**a run failed**: {columns}"), kind="danger")
+
+    def table_view(runs):
+        html = n_table(runs).to_html(border=0)
+        html = html.replace("<td>NO</td>", f'<td style="color:{BRAKE_COLOUR};font-weight:700">NO</td>')
+        return mo.Html(f'<div style="font-size:1.6em">{html}</div>')
 
     def comparison(runs):
         offline, device = runs["offline"], list(runs.values())[-1]
-        ghost = nearest_points(offline).loc[7]
+        ghost = nearest_points(offline).loc[FOCUS_OBJECT]
         points = nearest_points(device)
-        moved = abs(points.loc[7, "nearest_distance_m"] - ghost["nearest_distance_m"]) > 1e-3
+        moved = abs(points.loc[FOCUS_OBJECT, "nearest_distance_m"] - ghost["nearest_distance_m"]) > 1e-3
         figure = top_down(points, ghost=(ghost["x_m"], ghost["y_m"]) if moved else None, title=device.label)
-        return mo.hstack([figure, mo.vstack([badge(runs), n_table(runs)])], align="center")
+        return mo.hstack([figure, table_view(runs)], align="center")
 
-    return badge, comparison
+    return badge, comparison, table_view
 
 
 @app.cell(hide_code=True)
@@ -99,29 +115,29 @@ def _(DepthReaderA, DepthReaderB):
 
 
 @app.cell(hide_code=True)
-def _(compare, fault, frame, reader):
-    runs = compare(reader, fault=fault, frame=frame.value)
+def _(compare, fault, reader):
+    runs = compare(reader, fault=fault)
     return (runs,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    run_new = mo.ui.run_button(label="run")
-    show = mo.ui.run_button(label="compare")
-    mo.hstack([run_new, show], justify="start")
-    return run_new, show
+    show_badge = mo.ui.run_button(label="show result")
+    show_plot = mo.ui.run_button(label="compare")
+    mo.hstack([show_badge, show_plot], justify="start")
+    return show_badge, show_plot
 
 
 @app.cell(hide_code=True)
-def _(SCRIPT, badge, mo, run_new, runs):
-    mo.stop(not (run_new.value or SCRIPT))
+def _(SCRIPT, badge, mo, runs, show_badge):
+    mo.stop(not (show_badge.value or SCRIPT))
     badge(runs)
     return
 
 
 @app.cell(hide_code=True)
-def _(SCRIPT, comparison, mo, runs, show):
-    mo.stop(not (show.value or SCRIPT))
+def _(SCRIPT, comparison, mo, runs, show_plot):
+    mo.stop(not (show_plot.value or SCRIPT))
     comparison(runs)
     return
 
@@ -155,10 +171,9 @@ def _(comparison, runs):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""
-    ## Make it a check: the conversion declares the unit it assumes
-    """)
-    return
+    rerun_broken = mo.ui.run_button(label="rerun the broken setup")
+    mo.vstack([mo.md("## Make it a check: the conversion declares the unit it assumes"), rerun_broken])
+    return (rerun_broken,)
 
 
 @app.cell
@@ -168,23 +183,29 @@ def _(DepthReaderB, run):
 
 
 @app.cell(hide_code=True)
-def _(checked, mo):
+def _(SCRIPT, checked, mo, rerun_broken):
+    mo.stop(not (rerun_broken.value or SCRIPT))
     mo.callout(mo.md(checked.error or "no error"), kind="danger" if checked.error else "success")
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""
-    ## Next question: which object is approaching?
-    """)
-    return
+    ask = mo.ui.run_button(label="ask")
+    mo.vstack([mo.md("## Next question: which object is approaching?"), ask])
+    return (ask,)
 
 
 @app.cell
-def _(FEATURES, compare, fault, frame, n_table, reader):
-    asked = compare(reader, fault=fault, frame=frame.value, features=(*FEATURES, "approaching"))
-    n_table(asked)
+def _(FEATURES, compare, fault, reader):
+    asked = compare(reader, fault=fault, features=(*FEATURES, "approaching"))
+    return (asked,)
+
+
+@app.cell(hide_code=True)
+def _(SCRIPT, ask, asked, mo, table_view):
+    mo.stop(not (ask.value or SCRIPT))
+    table_view(asked)
     return
 
 

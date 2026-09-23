@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import inspect
 from typing import Any, ClassVar
 
 import numpy as np
@@ -33,14 +35,17 @@ class DepthLogReader(BaseInputData):
         if not isinstance(data_access, str) or not LOG_COLUMNS.issuperset(feature_names):
             return None
         assumed = options.get("assumed_units")
-        if assumed is not None and dict(assumed).get(cls.encoding) != cls.unit:
-            record_match_rejection(
-                cls.get_class_name(),
-                f"DepthToMetres assumes {cls.encoding} depth in {dict(assumed).get(cls.encoding)}, "
-                f"but {cls.get_class_name()} delivers {cls.unit}",
-                stage=INPUT_DATA_STAGE,
-            )
-            return None
+        if assumed is not None:
+            declared_by, units = assumed
+            expected = dict(units).get(cls.encoding)
+            if expected != cls.unit:
+                record_match_rejection(
+                    cls.get_class_name(),
+                    f"{declared_by} assumes {cls.encoding} depth in {expected}, "
+                    f"but {cls.get_class_name()} delivers {cls.unit}",
+                    stage=INPUT_DATA_STAGE,
+                )
+                return None
         return data_access
 
     @classmethod
@@ -54,7 +59,14 @@ class DepthLogReader(BaseInputData):
 
     @classmethod
     def declared_attributes(cls, features: FeatureSet | None) -> dict[str, str]:
-        return {"unit": cls.unit, "encoding": cls.encoding, "sensor": cls.sensor, "frame": "camera_optical"}
+        version = hashlib.sha256(inspect.getsource(cls).encode()).hexdigest()[:4]
+        return {
+            "unit": cls.unit,
+            "encoding": cls.encoding,
+            "sensor": cls.sensor,
+            "frame": "camera_optical",
+            "version": version,
+        }
 
 
 class DepthReaderA(DepthLogReader):
