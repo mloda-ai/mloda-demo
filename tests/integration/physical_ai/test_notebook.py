@@ -10,6 +10,7 @@ from mloda_demo.physical_ai.readers import DepthReaderB
 
 NOTEBOOK = Path(__file__).resolve().parents[3] / "notebooks" / "physical_ai.py"
 CSS = NOTEBOOK.with_suffix(".css")
+SLIDES = NOTEBOOK.parents[1] / "slides" / "physical_ai.html"
 
 
 def _notebook() -> ModuleType:
@@ -58,10 +59,10 @@ def _contrast(foreground: str, background: str) -> float:
     return (high + 0.05) / (low + 0.05)
 
 
-def test_notebook_css_works_offline_and_mirrors_the_palette() -> None:
+def test_notebook_css_and_slides_work_offline_and_mirror_the_palette() -> None:
     assert f'css_file="{CSS.name}"' in NOTEBOOK.read_text()
     css = CSS.read_text()
-    rest = re.sub(r'url\("data:font/woff2;base64,[A-Za-z0-9+/=]+"\)', "", css)
+    rest = re.sub(r'url\("data:font/woff2;base64,[A-Za-z0-9+/=]+"\)', "", css) + SLIDES.read_text()
     assert not any(remote in rest for remote in ("url(", "@import", "http"))
     assert re.findall(r'font-family: "([^"]+)";', css) == ["Schibsted Grotesk", "Bricolage Grotesque", "DM Mono"]
     tokens = dict(re.findall(r"--mloda-([a-z-]+): (#[0-9A-F]{6});", css))
@@ -77,6 +78,7 @@ def test_notebook_css_works_offline_and_mirrors_the_palette() -> None:
         "on-dark": style.ON_DARK,
         "highlight": style.HIGHLIGHT,
         "red": style.RED,
+        "red-strong": style.RED_STRONG,
     }
 
 
@@ -89,8 +91,8 @@ def test_palette_contrast_holds_for_text_and_marks() -> None:
         (style.ON_DARK, style.CODE),
         (style.ON_DARK, style.PANEL),
         (style.INK, style.HIGHLIGHT),
+        (style.RED_STRONG, style.CARD),
     ]
-    # Plot markers, and large bold text such as the n-table's red NO.
-    marks = [(style.RED, style.PAGE), (style.GREEN, style.PAGE), (style.RED, style.CARD), (style.GREEN, style.PANEL)]
+    marks = [(style.RED, style.PAGE), (style.GREEN, style.PAGE), (style.GREEN, style.PANEL)]
     assert min(_contrast(*pair) for pair in text) >= 4.5
     assert min(_contrast(*pair) for pair in marks) >= 3.0

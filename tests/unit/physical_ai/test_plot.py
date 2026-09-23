@@ -5,7 +5,6 @@ import pandas as pd
 from matplotlib import font_manager
 
 from mloda_demo.physical_ai.plot import RANGE_M, top_down
-from mloda_demo.physical_ai.style import FONTS
 
 POINTS = pd.DataFrame(
     {"x_m": [1.2, 42.0], "y_m": [0.0, 0.0], "brake": [True, False]}, index=pd.Index([7, 5], name="object_id")
@@ -27,6 +26,6 @@ def test_plot_text_uses_the_shipped_brand_font_when_drawn_later() -> None:
     figure.savefig(io.BytesIO(), format="png")
     axes = figure.axes[0]
     texts = [axes.title, axes.xaxis.label, *axes.get_xticklabels(), *axes.texts]
-    fonts = {str(font_manager.findfont(text.get_fontproperties(), fallback_to_default=False)) for text in texts}
-    assert fonts == {str(FONTS / "SchibstedGrotesk-Regular.ttf")}
+    paths = {font_manager.findfont(text.get_fontproperties(), fallback_to_default=False) for text in texts}
+    assert {font_manager.get_font(path).family_name for path in paths} == {"Schibsted Grotesk"}
     assert "Schibsted Grotesk" not in matplotlib.rcParams["font.family"]

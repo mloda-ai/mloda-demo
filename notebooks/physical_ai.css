@@ -17,6 +17,7 @@
   --mloda-on-dark: #F4F7F4;
   --mloda-highlight: #FAD689;
   --mloda-red: #EF4444;
+  --mloda-red-strong: #B91C1C;
   --mloda-sans: "Schibsted Grotesk", Helvetica, Arial, sans-serif;
   --mloda-button: "Bricolage Grotesque", var(--mloda-sans);
   --mloda-mono: "DM Mono", Menlo, monospace;
@@ -61,6 +62,9 @@ button[data-testid="marimo-plugin-button"]:hover {
 [data-testid="range"] {
   background: var(--mloda-green);
 }
+[data-testid="thumb"] {
+  border-color: var(--mloda-green);
+}
 
 .admonition.success,
 .admonition.danger {
@@ -81,7 +85,7 @@ button[data-testid="marimo-plugin-button"]:hover {
 }
 
 table.dataframe {
-  width: auto;
+  width: fit-content;
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 16px;
@@ -99,6 +103,10 @@ table.dataframe tbody tr:nth-child(n) {
 }
 table.dataframe th {
   font-weight: 500;
+}
+table.dataframe td.brake {
+  color: var(--mloda-red-strong);
+  font-weight: 700;
 }
 
 pre.trace {
@@ -120,6 +128,19 @@ pre.trace mark {
 
 .markdown .codehilite {
   border-radius: 16px;
+  background: var(--mloda-code);
+}
+.markdown .codehilite pre,
+.markdown .codehilite code {
+  background: none;
+  color: var(--mloda-on-dark);
+  font-family: var(--mloda-mono);
+}
+.markdown .codehilite .gd {
+  color: #F87171;
+}
+.markdown .codehilite .gi {
+  color: #4FC578;
 }
 
 @font-face {

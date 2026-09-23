@@ -1,4 +1,4 @@
-Schibsted Grotesk, Bricolage Grotesque and DM Mono, as used on mloda.ai. The TTF files here and the
+Schibsted Grotesk, Bricolage Grotesque and DM Mono, as used on mloda.ai. The TTF file here and the
 woff2 data embedded in notebooks/physical_ai.css are derived from them.
 
 Copyright 2023 The Schibsted-Grotesk Project Authors (https://github.com/schibsted/schibsted-grotesk)
