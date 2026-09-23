@@ -20,6 +20,9 @@ resolution-markers = [
     "python_full_version < '3.11'",
 ]
 
+[manifest]
+overrides = [{ name = "mloda-community-extenders-shared", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3" }]
+
 [[package]]
 name = "anyio"
 version = "4.15.1"
@@ -1628,25 +1631,19 @@ wheels = [
 [[package]]
 name = "mloda-community-extenders-shared"
 version = "0.4.7"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fshared&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3#895167d4ccd6dd9b73e970d022d053bb86dadbd3" }
 dependencies = [
     { name = "mloda" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/bc/70/3512a9817d84971d253d67906be9edc67fdfc8f6ecae1e53f9ebc1c4f1f7/mloda_community_extenders_shared-0.4.7-py3-none-any.whl", hash = "sha256:8d40e9cc0764b862bb5916fd04fbfddc5c8b4273f4baabb382264d147b4c13b8", size = 2474, upload-time = "2026-09-16T15:14:33.527Z" },
 ]
 
 [[package]]
 name = "mloda-community-otel"
 version = "0.4.7"
-source = { registry = "https://pypi.org/simple" }
+source = { git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3#895167d4ccd6dd9b73e970d022d053bb86dadbd3" }
 dependencies = [
     { name = "mloda" },
     { name = "mloda-community-extenders-shared" },
     { name = "opentelemetry-api" },
-]
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b0/c2/b561915bae3e3a7206a19f1b34e3584ffcea333f2110978b86cee8e3449f/mloda_community_otel-0.4.7-py3-none-any.whl", hash = "sha256:8f9fc18475aa0b456dd96b7ab1849eadcdd87e7356076541257641e241ddd2a3", size = 7671, upload-time = "2026-09-16T15:15:06.353Z" },
 ]
 
 [[package]]
@@ -1691,7 +1688,7 @@ requires-dist = [
     { name = "marimo" },
     { name = "matplotlib" },
     { name = "mloda", specifier = ">=0.13.0,<0.14.0" },
-    { name = "mloda-community-otel", specifier = ">=0.4.7" },
+    { name = "mloda-community-otel", git = "https://github.com/mloda-ai/mloda-registry?subdirectory=mloda%2Fcommunity%2Fextenders%2Fotel&rev=895167d4ccd6dd9b73e970d022d053bb86dadbd3" },
     { name = "mloda-testing", marker = "extra == 'dev'", specifier = ">=0.4.7" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },
