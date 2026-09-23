@@ -14,17 +14,6 @@ class ModelArtifact(BaseArtifact):
     """
 
     @classmethod
-    def custom_saver(cls, features: FeatureSet, artifact: Any) -> Any | None:
-        return artifact
-
-    @classmethod
-    def custom_loader(cls, features: FeatureSet) -> Any | None:
-        options = cls.get_singular_option_from_options(features)
-        if options is None or features.name_of_one_feature is None:
-            return None
-        return options.get(str(features.name_of_one_feature))
-
-    @classmethod
     def load_model(cls, features: FeatureSet, artifact_key: str) -> dict[str, Any] | None:
         if features.artifact_to_load:
             artifacts = cls.custom_loader(features)

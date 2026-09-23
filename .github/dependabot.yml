@@ -19,3 +19,5 @@ updates:
         - "mloda"
         - "mloda-registry"
         - "mloda-testing"
+        - "mloda-community-otel"
+        - "mloda-community-extenders-shared"

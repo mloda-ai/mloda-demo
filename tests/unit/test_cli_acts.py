@@ -1,8 +1,8 @@
 """Unit tests mirroring the 5 acts of the applydata 2026 live demo.
 
-Each act in the handbook (`demo/applydata_handbook.md`) corresponds to one
-test here. These exercise the deterministic substrate the agent-on-top
-relies on: same input -> same output, every time. No subprocess, no LLM.
+Each act of the demo corresponds to one test here. These exercise the
+deterministic substrate the agent-on-top relies on: same input -> same
+output, every time. No subprocess, no LLM.
 """
 
 from __future__ import annotations
