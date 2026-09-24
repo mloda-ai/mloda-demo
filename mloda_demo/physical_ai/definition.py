@@ -9,6 +9,7 @@ import pandas as pd
 from mloda.provider import ComputeFramework, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
+from numpy.typing import NDArray
 
 from mloda_demo.physical_ai.clip import CORRIDOR, PERCENTILE, nearest_in_corridor
 
@@ -24,7 +25,7 @@ class PandasOnly:
         return {PandasDataFrame}
 
 
-def to_metres(raw: np.ndarray, scale: float) -> np.ndarray:
+def to_metres(raw: NDArray[Any], scale: float) -> NDArray[np.float64]:
     """Divide by the declared scale, or by the assumed one when undeclared (NaN); zero stays invalid as NaN."""
     if np.isnan(scale):
         encoding = str(raw.dtype)

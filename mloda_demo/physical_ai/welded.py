@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
+from numpy.typing import NDArray
 
 from mloda_demo.physical_ai.clip import CLIP_DIR, frame_index, load_depth, nearest_in_corridor
 from mloda_demo.physical_ai.definition import PandasOnly
@@ -19,7 +20,7 @@ def _frames(column: str) -> pd.DataFrame:
     return pd.DataFrame({"frame": index["frame"].to_numpy(), column: pd.Series(depth, dtype=object)})
 
 
-def _metres(raw: np.ndarray, scale: float) -> np.ndarray:
+def _metres(raw: NDArray[Any], scale: float) -> NDArray[np.float64]:
     metres = raw.astype(np.float64) / scale
     metres[raw == 0] = np.nan
     return metres

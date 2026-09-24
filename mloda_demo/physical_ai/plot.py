@@ -8,6 +8,7 @@ import matplotlib
 import numpy as np
 from matplotlib.figure import Figure
 from matplotlib.patches import FancyBboxPatch, Rectangle
+from numpy.typing import NDArray
 
 from mloda_demo.physical_ai.clip import corridor
 from mloda_demo.physical_ai.style import CARD, GREEN, GREEN_STRONG, INK, MATPLOTLIB, MUTED, RED_STRONG
@@ -16,7 +17,7 @@ ATTRIBUTION = "TUM RGB-D benchmark, freiburg2_pioneer_slam (CC BY 4.0), Sturm et
 
 
 @matplotlib.rc_context(MATPLOTLIB)
-def frame_view(rgb: np.ndarray, depth_m: np.ndarray, nearest: float, stop: bool, t_s: float) -> Figure:
+def frame_view(rgb: NDArray[np.uint8], depth_m: NDArray[np.float64], nearest: float, stop: bool, t_s: float) -> Figure:
     """Camera large on the left, the depth map as any viewer shows it (auto-scaled) on the right, the number below."""
     figure = Figure(figsize=(11, 4.9), dpi=72)
     grid = figure.add_gridspec(1, 2, width_ratios=[3, 2], left=0.02, right=0.98, top=0.9, bottom=0.2, wspace=0.05)
