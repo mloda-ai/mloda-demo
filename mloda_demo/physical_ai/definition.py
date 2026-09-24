@@ -1,4 +1,4 @@
-"""The shared definition: one meaning of distance, whichever device or context the data comes from."""
+"""The shared definition: one meaning of the nearest obstacle ahead, whichever reader delivered the depth."""
 
 from __future__ import annotations
 
@@ -10,19 +10,12 @@ from mloda.provider import ComputeFramework, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
-# Robot calibration: pinhole intrinsics, camera at the base_link origin.
-CALIBRATION_VERSION = "2026-09-01"
-FX = 525.0
-CX = 320.0
+from mloda_demo.physical_ai.clip import CORRIDOR, PERCENTILE, nearest_in_corridor
 
-BRAKE_THRESHOLD_M = 2.0
-APPROACH_SPEED_MPS = 0.5
-
-TO_METRES = {"m": 1.0, "cm": 0.01, "mm": 0.001}
-# Unit assumed per raw depth encoding.
-ASSUMED_UNITS = {"float32": "m", "uint16": "mm"}
-# The bug: integer depth read as centimetres.
-FAULTY_UNITS = {**ASSUMED_UNITS, "uint16": "cm"}
+STOP_THRESHOLD_M = 1.0
+# What the conversion assumes when the reader declares no scale: 16-bit depth in millimetres.
+ASSUMED_SCALE = {"uint16": 1000.0}
+ASSUMED_UNIT = {"uint16": "mm"}
 
 
 class PandasOnly:
@@ -31,122 +24,74 @@ class PandasOnly:
         return {PandasDataFrame}
 
 
+def to_metres(raw: np.ndarray, scale: float) -> np.ndarray:
+    """Divide by the declared scale, or by the assumed one when undeclared (NaN); zero stays invalid as NaN."""
+    if np.isnan(scale):
+        encoding = str(raw.dtype)
+        if encoding not in ASSUMED_SCALE:
+            raise ValueError(f"DepthToMetres assumes no scale for {encoding} depth")
+        scale = ASSUMED_SCALE[encoding]
+    metres = raw.astype(np.float64) / scale
+    metres[raw == 0] = np.nan
+    return metres
+
+
 class DepthToMetres(PandasOnly, FeatureGroup):
-    """Raw depth to metres, with the unit assumed from the raw encoding."""
+    """Raw depth to metres by the reader's declared scale."""
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("depth_raw")}
+        return {Feature("depth_raw"), Feature("depth_scale")}
 
     @classmethod
     def feature_names_supported(cls) -> set[str]:
         return {"depth_m"}
 
     @classmethod
-    def assumed_units(cls, fault: bool = False) -> dict[str, str]:
-        """The unit this conversion assumes per raw encoding; the check beat enforces it at the reader."""
-        return FAULTY_UNITS if fault else ASSUMED_UNITS
-
-    @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        raw = data["depth_raw"]
-        units = cls.assumed_units(bool(features.get_options_key("fault")))
-        encoding = str(raw.dtype)
-        if encoding not in units:
-            raise ValueError(f"DepthToMetres assumes no unit for {encoding} depth")
-        data["depth_m"] = raw.astype("float64") * TO_METRES[units[encoding]]
+        metres = [to_metres(raw, scale) for raw, scale in zip(data["depth_raw"], data["depth_scale"], strict=True)]
+        data["depth_m"] = pd.Series(metres, index=data.index, dtype=object)
         return data
 
     @classmethod
     def declared_attributes(cls, features: FeatureSet | None) -> dict[str, str]:
-        fault = bool(features is not None and features.get_options_key("fault"))
-        return {"unit": "m", **{f"assumes.{encoding}": unit for encoding, unit in cls.assumed_units(fault).items()}}
+        return {"unit": "m", **{f"assumes.{encoding}": unit for encoding, unit in ASSUMED_UNIT.items()}}
 
 
-class Calibration(PandasOnly, FeatureGroup):
-    """Camera optical frame (x right, z forward) to the base_link ground plane (x forward, y left)."""
+class NearestAhead(PandasOnly, FeatureGroup):
+    """Nearest valid reading in the central corridor, per frame."""
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("depth_m"), Feature("u")}
+        return {Feature("depth_m")}
 
     @classmethod
     def feature_names_supported(cls) -> set[str]:
-        return {"x_m", "y_m"}
+        return {"nearest_ahead_m"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["x_m"] = data["depth_m"]
-        data["y_m"] = -(data["u"] - CX) * data["depth_m"] / FX
+        data["nearest_ahead_m"] = [nearest_in_corridor(metres) for metres in data["depth_m"]]
         return data
 
     @classmethod
     def declared_attributes(cls, features: FeatureSet | None) -> dict[str, str]:
-        return {"calibration": CALIBRATION_VERSION, "source_frame": "camera_optical", "frame": "base_link"}
+        return {"unit": "m", "corridor": CORRIDOR, "percentile": f"{PERCENTILE:g}"}
 
 
-class NearestDistance(PandasOnly, FeatureGroup):
-    """Ground-plane distance to each object's nearest point, per frame."""
+class StopRule(PandasOnly, FeatureGroup):
+    """Stop when the nearest obstacle ahead is closer than the threshold, or unknown."""
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("x_m"), Feature("y_m"), Feature("frame"), Feature("object_id")}
+        return {Feature("nearest_ahead_m")}
 
     @classmethod
     def feature_names_supported(cls) -> set[str]:
-        return {"nearest_distance_m"}
+        return {"stop"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        distance = pd.Series(np.hypot(data["x_m"], data["y_m"]), index=data.index)
-        data["nearest_distance_m"] = distance.groupby([data["frame"], data["object_id"]]).transform("min")
+        data["stop"] = ~(data["nearest_ahead_m"] >= STOP_THRESHOLD_M)
         return data
 
     @classmethod
-    def declared_attributes(cls, features: FeatureSet | None) -> dict[str, str]:
-        return {"unit": "m", "frame": "base_link"}
-
-
-class BrakeRule(PandasOnly, FeatureGroup):
-    """Brake when an object is nearer than the threshold."""
-
-    def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("nearest_distance_m")}
-
-    @classmethod
-    def feature_names_supported(cls) -> set[str]:
-        return {"brake"}
-
-    @classmethod
-    def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["brake"] = data["nearest_distance_m"] < BRAKE_THRESHOLD_M
-        return data
-
-    @classmethod
-    def declared_attributes(cls, features: FeatureSet | None) -> dict[str, float]:
-        return {"threshold_m": BRAKE_THRESHOLD_M}
-
-
-class Approaching(PandasOnly, FeatureGroup):
-    """An object closes in faster than the threshold speed since the previous frame."""
-
-    def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("nearest_distance_m"), Feature("timestamp"), Feature("frame"), Feature("object_id")}
-
-    @classmethod
-    def feature_names_supported(cls) -> set[str]:
-        return {"approaching"}
-
-    @classmethod
-    def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        keys = ["object_id", "frame"]
-        per_frame = data.groupby(keys, as_index=False)[["timestamp", "nearest_distance_m"]].first()
-        per_frame = per_frame.sort_values(["object_id", "timestamp"])
-        by_object = per_frame.groupby("object_id")
-        speed = -by_object["nearest_distance_m"].diff() / by_object["timestamp"].diff()
-        per_frame["approaching"] = speed > APPROACH_SPEED_MPS
-        data["approaching"] = (
-            data[keys].merge(per_frame[[*keys, "approaching"]], on=keys, how="left")["approaching"].to_numpy()
-        )
-        return data
-
-    @classmethod
-    def declared_attributes(cls, features: FeatureSet | None) -> dict[str, float]:
-        return {"min_speed_mps": APPROACH_SPEED_MPS}
+    def declared_attributes(cls, features: FeatureSet | None) -> dict[str, float | str]:
+        return {"threshold_m": STOP_THRESHOLD_M, "on_missing": "stop"}

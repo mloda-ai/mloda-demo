@@ -16,6 +16,7 @@ dependencies = [
     "pandas",
     "numpy",
     "matplotlib",
+    "pillow",
 ]
 requires-python = ">=3.10"
 
