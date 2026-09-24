@@ -1,1 +1,1 @@
-"""Physical AI demo: one distance definition across logs, replay, and a new depth sensor."""
+"""Physical AI demo: one definition of the nearest obstacle ahead, whichever reader delivered the depth."""

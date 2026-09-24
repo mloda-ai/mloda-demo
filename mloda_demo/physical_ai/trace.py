@@ -120,6 +120,8 @@ def _mark(line: TraceLine, encoding: str) -> TraceLine:
 
 def header(result: Run, frame: int | None = None) -> str:
     run_id = next((str(_attributes(s)["mloda.run.id"]) for s in result.spans if "mloda.run.id" in _attributes(s)), "?")
+    if not result.passed:
+        return f"run {run_id[-4:]} · {result.label} · refused"
     frame = closest_frame(result) if frame is None else frame
     return f"run {run_id[-4:]} · {result.label} · frame {frame}, t = {float(at_frame(result, frame)['t_s']):.1f} s"
 

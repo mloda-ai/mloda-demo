@@ -37,4 +37,4 @@ def nearest_in_corridor(values: np.ndarray) -> float:
     """The 2nd percentile of the valid (finite, positive) corridor values; NaN when nothing is valid."""
     band = corridor(values).astype(np.float64)
     valid = band[np.isfinite(band) & (band > 0)]
-    return float(np.percentile(valid, PERCENTILE)) if valid.size else float("nan")
+    return float(np.percentile(valid, PERCENTILE, method="lower")) if valid.size else float("nan")

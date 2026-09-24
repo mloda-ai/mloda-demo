@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from matplotlib.axes import Axes
 
 from mloda_demo.physical_ai.plot import ATTRIBUTION, frame_view, pipeline_graph
@@ -25,3 +26,5 @@ def test_pipeline_graph_draws_shared_steps_once() -> None:
     assert sorted(separate) == ["A", "A2", "B", "B2"]
     assert merged.count("Shared1") == 1
     assert sorted(merged) == ["A", "B", "Shared1", "Shared2"]
+    with pytest.raises(ValueError, match="step of its own"):
+        pipeline_graph([["Shared1"], ["Shared1"]])

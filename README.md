@@ -43,7 +43,7 @@ Run `mloda-demo --help` for all commands.
 
 Talk: *"One Pipeline, Any Device"*. One definition of the nearest obstacle ahead, two readers, and an OpenTelemetry trace that shows where a wrong number came from. No PyTorch needed.
 
-A real robot: the TUM RGB-D benchmark's Pioneer with a Kinect on top (`freiburg2_pioneer_slam`) drives at a chair. Read through `DepthPng`, a generic 16-bit PNG reader that declares no scale, the conversion assumes millimetres and the robot puts the chair at 2.9 m. Read through `TumDepth`, which declares 5000 per metre, it stops at 0.58 m. Only the readers are device-specific; `DepthToMetres`, `NearestAhead` and `StopRule` are one shared definition, and a reader without a declared scale is refused before the first frame is loaded.
+A real robot: the TUM RGB-D benchmark's Pioneer with a Kinect on top (`freiburg2_pioneer_slam`) drives at a chair. Read through `DepthPng`, a generic 16-bit PNG reader that declares no scale, the conversion assumes millimetres and the robot puts the chair at 2.9 m. Read through `TumDepth`, which declares 5000 per metre, it stops at 0.58 m. Only the readers are device-specific; `DepthToMetres`, `NearestAhead` and `StopRule` are one shared definition, and, with the check on, a reader without a declared scale is refused before the first frame is loaded.
 
 ```bash
 marimo edit notebooks/physical_ai.py

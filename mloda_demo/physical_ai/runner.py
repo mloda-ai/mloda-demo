@@ -76,8 +76,11 @@ def rejection(error: FeatureResolutionError) -> str:
 
 
 def closest_frame(result: Run) -> int:
-    """The frame with the nearest reading: the chair."""
-    return int(result.table.loc[result.table["nearest_ahead_m"].idxmin(), "frame"])
+    """The frame with the nearest reading: the chair. The last frame when no reading is valid."""
+    nearest = result.table["nearest_ahead_m"]
+    if nearest.isna().all():
+        return int(result.table["frame"].iloc[-1])
+    return int(result.table.loc[nearest.idxmin(), "frame"])
 
 
 def at_frame(result: Run, frame: int) -> pd.Series:

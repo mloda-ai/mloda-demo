@@ -74,7 +74,7 @@ class KinectStop(PandasOnly, FeatureGroup):
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["kinect_stop"] = data["kinect_nearest_m"] < 1.0
+        data["kinect_stop"] = ~(data["kinect_nearest_m"] >= 1.0)
         return data
 
 
@@ -127,7 +127,7 @@ class TumStop(PandasOnly, FeatureGroup):
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["tum_stop"] = data["tum_nearest_m"] < 1.0
+        data["tum_stop"] = ~(data["tum_nearest_m"] >= 1.0)
         return data
 
 

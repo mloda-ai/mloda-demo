@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 
 import numpy as np
 from mloda.provider import FeatureSet
@@ -15,8 +16,9 @@ def test_root_feature_group_reads_through_the_reader_family() -> None:
     assert isinstance(DepthFrames.input_data(), DepthFrameReader)
 
 
-def test_reader_claims_clip_columns_only() -> None:
+def test_reader_claims_clip_columns_only(tmp_path: Path) -> None:
     assert DepthPng.match_subclass_data_access(CLIP, ["depth_raw", "frame"], Options()) == CLIP
+    assert DepthPng.match_subclass_data_access(str(tmp_path), ["depth_raw"], Options()) is None
     assert DepthPng.match_subclass_data_access(CLIP, ["depth_m"], Options()) is None
     assert DepthPng.match_subclass_data_access(None, ["depth_raw"], Options()) is None
 
@@ -41,8 +43,10 @@ def test_load_data_gives_one_row_per_frame_with_the_declared_scale(feature_set: 
 def test_clip_index_pairs_each_depth_frame_with_its_camera_image() -> None:
     frames = frame_index(CLIP_DIR)
     assert list(frames["frame"]) == list(range(54))
-    rgb = load_rgb(CLIP_DIR / frames.loc[frames["frame"] == 53, "rgb"].iloc[0])
-    assert (rgb.shape, rgb.dtype) == ((480, 640, 3), np.uint8)
+    assert frames["t_s"].is_monotonic_increasing
+    for path in frames["rgb"]:
+        rgb = load_rgb(CLIP_DIR / path)
+        assert (rgb.shape, rgb.dtype) == ((480, 640, 3), np.uint8)
 
 
 def test_readers_declare_scale_encoding_and_their_own_version() -> None:

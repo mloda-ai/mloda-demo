@@ -30,7 +30,9 @@ class DepthFrameReader(BaseInputData):
 
     @classmethod
     def match_subclass_data_access(cls, data_access: Any, feature_names: list[str], options: Options) -> Any:
-        if not isinstance(data_access, (str, Path)) or not READER_COLUMNS.issuperset(feature_names):
+        if not isinstance(data_access, (str, Path)) or not (Path(data_access) / "frames.csv").is_file():
+            return None
+        if not READER_COLUMNS.issuperset(feature_names):
             return None
         consumer = options.get(REQUIRES_DECLARED_SCALE)
         if consumer is not None and cls.scale is None:
@@ -44,9 +46,12 @@ class DepthFrameReader(BaseInputData):
 
     @classmethod
     def load_data(cls, data_access: Any, features: FeatureSet) -> Any:
-        directory = Path(data_access)
+        directory = Path(data_access).resolve()
         index = frame_index(directory)
-        depth = [load_depth(directory / path) for path in index["depth"]]
+        paths = [(directory / path).resolve() for path in index["depth"]]
+        if any(directory not in path.parents for path in paths):
+            raise ValueError("frames.csv points outside the clip directory")
+        depth = [load_depth(path) for path in paths]
         return pd.DataFrame(
             {
                 "frame": index["frame"].to_numpy(),

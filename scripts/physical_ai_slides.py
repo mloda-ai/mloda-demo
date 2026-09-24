@@ -16,15 +16,19 @@ SLIDES = Path(__file__).resolve().parents[1] / "slides"
 SVG = {"format": "svg", "transparent": True, "metadata": {"Date": None}}
 
 
-def main() -> None:
+def main(out_dir: Path = SLIDES) -> None:
     matplotlib.rcParams["svg.hashsalt"] = "mloda-demo"
     kinect = run(None, features=welded.KINECT_FEATURES, feature_groups=welded.KINECT_CHAIN, label="kinect")
     tum = run(None, features=welded.TUM_FEATURES, feature_groups=welded.TUM_CHAIN, label="tum")
-    welded_picture = pipeline_graph([chain(kinect), chain(tum)])
-    welded_picture.savefig(SLIDES / "pipelines_welded.svg", **SVG)
-    shared_picture = pipeline_graph([chain(run(DepthPng)), chain(run(TumDepth))])
-    shared_picture.savefig(SLIDES / "pipeline_shared.svg", **SVG)
-    print("wrote", SLIDES / "pipelines_welded.svg", "and", SLIDES / "pipeline_shared.svg")
+    generic, declared = run(DepthPng), run(TumDepth)
+    for result in (kinect, tum, generic, declared):
+        if not result.passed:
+            raise RuntimeError(f"{result.label}: {result.error}")
+    if chain(kinect) == chain(tum) or chain(generic) == chain(declared):
+        raise RuntimeError("the two runs of a picture must differ")
+    pipeline_graph([chain(kinect), chain(tum)]).savefig(out_dir / "pipelines_welded.svg", **SVG)
+    pipeline_graph([chain(generic), chain(declared)]).savefig(out_dir / "pipeline_shared.svg", **SVG)
+    print("wrote", out_dir / "pipelines_welded.svg", "and", out_dir / "pipeline_shared.svg")
 
 
 if __name__ == "__main__":

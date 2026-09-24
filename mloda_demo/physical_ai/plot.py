@@ -18,7 +18,7 @@ ATTRIBUTION = "TUM RGB-D benchmark, freiburg2_pioneer_slam (CC BY 4.0), Sturm et
 @matplotlib.rc_context(MATPLOTLIB)
 def frame_view(rgb: np.ndarray, depth_m: np.ndarray, nearest: float, stop: bool, t_s: float) -> Figure:
     """Camera large on the left, the depth map as any viewer shows it (auto-scaled) on the right, the number below."""
-    figure = Figure(figsize=(11, 4.9))
+    figure = Figure(figsize=(11, 4.9), dpi=72)
     grid = figure.add_gridspec(1, 2, width_ratios=[3, 2], left=0.02, right=0.98, top=0.9, bottom=0.2, wspace=0.05)
     camera = figure.add_subplot(grid[0, 0])
     camera.imshow(rgb)
@@ -44,9 +44,11 @@ def frame_view(rgb: np.ndarray, depth_m: np.ndarray, nearest: float, stop: bool,
 
 @matplotlib.rc_context(MATPLOTLIB)
 def pipeline_graph(chains: Sequence[Sequence[str]]) -> Figure:
-    """Boxes and arrows, one row per chain; a step every chain has is drawn once."""
+    """Boxes and arrows, one row per chain; a step every chain has is drawn once, after each chain's own steps."""
     shared = [step for step in chains[0] if all(step in chain for chain in chains[1:])]
     own = [[step for step in chain if step not in shared] for chain in chains]
+    if any(not steps for steps in own):
+        raise ValueError("every chain needs a step of its own before the shared ones")
     rows = len(chains)
     columns = max(len(chain) for chain in chains)
     figure = Figure(figsize=(2.6 * columns + 0.6, 1.5 * rows + 0.6))

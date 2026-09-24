@@ -43,8 +43,11 @@ def test_rendered_trace_highlights_the_scale_and_the_assumption() -> None:
     assert "<mark>assumes mm</mark>" in rendered
 
 
-def test_failed_run_has_no_trace_lines() -> None:
-    assert trace_lines(run(DepthPng, check=True)) == []
+def test_failed_run_has_no_trace_lines_and_a_refused_header() -> None:
+    refused = run(DepthPng, check=True)
+    assert trace_lines(refused) == []
+    assert format_trace(refused).endswith("generic PNG · refused")
+    assert trace_html(refused).startswith('<pre class="trace">run ')
 
 
 def test_chain_names_the_reader_and_welded_runs_share_nothing() -> None:

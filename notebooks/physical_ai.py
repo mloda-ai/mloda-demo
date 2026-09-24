@@ -6,6 +6,7 @@ app = marimo.App(width="medium", css_file="physical_ai.css")
 
 @app.cell(hide_code=True)
 def _():
+    import html
     import inspect
 
     import marimo as mo
@@ -28,6 +29,7 @@ def _():
         closest_frame,
         frame_view,
         frames,
+        html,
         inspect,
         load_rgb,
         mo,
@@ -38,10 +40,16 @@ def _():
 
 @app.cell(hide_code=True)
 def _(CLIP_DIR, at_frame, frame_view, frames, load_rgb):
+    rendered = {}
+
     def view(result, frame):
-        row = at_frame(result, frame)
-        rgb = load_rgb(CLIP_DIR / frames.loc[frames["frame"] == frame, "rgb"].iloc[0])
-        return frame_view(rgb, row["depth_m"], float(row["nearest_ahead_m"]), bool(row["stop"]), float(row["t_s"]))
+        key = (result.label, frame)
+        if key not in rendered:
+            row = at_frame(result, frame)
+            rgb = load_rgb(CLIP_DIR / frames.loc[frames["frame"] == frame, "rgb"].iloc[0])
+            nearest, stop, t_s = float(row["nearest_ahead_m"]), bool(row["stop"]), float(row["t_s"])
+            rendered[key] = frame_view(rgb, row["depth_m"], nearest, stop, t_s)
+        return rendered[key]
 
     return (view,)
 
@@ -68,8 +76,11 @@ def _(reader, run):
 
 
 @app.cell(hide_code=True)
-def _(frames, mo):
-    replay = mo.ui.slider(0, len(frames) - 1, value=0, label="frame", show_value=True, full_width=True)
+def _(frames, mo, reader):
+    # Recreated on a reader swap, so the replay starts again at the first frame.
+    replay = mo.ui.slider(
+        steps=frames["frame"].tolist(), value=0, label=f"frame ({reader.label})", show_value=True, full_width=True
+    )
     mo.hstack([replay])
     return (replay,)
 
@@ -87,8 +98,10 @@ def _(mo, replay, result, trace_html):
 
 
 @app.cell(hide_code=True)
-def _(TumDepth, inspect, mo):
-    mo.vstack([mo.md("## Swap the reader"), mo.md(f"```python\n{inspect.getsource(TumDepth)}```")])
+def _(TumDepth, html, inspect, mo):
+    source = html.escape(inspect.getsource(TumDepth))
+    source = source.replace("scale = 5000  # per metre", "<mark>scale = 5000  # per metre</mark>", 1)
+    mo.vstack([mo.md("## Swap the reader"), mo.Html(f'<pre class="trace">{source}</pre>')])
     return
 
 
@@ -100,16 +113,11 @@ def _(mo):
 
 
 @app.cell(hide_code=True)
-def _(DepthPng, run):
-    checked = run(DepthPng, check=True)
-    return (checked,)
-
-
-@app.cell(hide_code=True)
-def _(SCRIPT, checked, mo, rerun_broken):
+def _(SCRIPT, DepthPng, mo, rerun_broken, run):
     mo.stop(not (rerun_broken.value or SCRIPT))
+    checked = run(DepthPng, check=True)
     mo.callout(mo.md(checked.error or "no error"), kind="danger" if checked.error else "success")
-    return
+    return (checked,)
 
 
 @app.cell(hide_code=True)
