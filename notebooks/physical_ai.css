@@ -98,3 +98,74 @@ pre.trace mark {
   background: var(--mloda-highlight);
   color: var(--mloda-ink);
 }
+
+/* One-process notebook: the four boxes, the pipeline pictures, the close. */
+.boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 8px 0 24px;
+}
+.box {
+  padding: 20px 24px;
+  border-radius: 16px;
+  background: var(--mloda-card);
+}
+.box h3 {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--mloda-muted);
+}
+.box p {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--mloda-ink);
+}
+figure.lineage {
+  margin: 8px 0 0;
+}
+figure.lineage svg {
+  display: block;
+  height: auto;
+}
+figure.lineage figcaption {
+  margin-top: 8px;
+  font-family: var(--mloda-mono);
+  font-size: 0.9rem;
+  color: var(--mloda-muted);
+}
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  margin: 8px 0 24px;
+}
+.close p {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--mloda-ink);
+}
+.close p.muted {
+  margin-top: 20px;
+  font-weight: 400;
+  color: var(--mloda-muted);
+}
+.qr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mloda-mono);
+  font-size: 0.95rem;
+  color: var(--mloda-muted);
+}
+.qr svg {
+  width: 200px;
+  height: 200px;
+  border-radius: 8px;
+}
