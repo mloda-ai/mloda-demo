@@ -82,28 +82,6 @@ button[data-testid="marimo-plugin-button"]:hover {
   background: #FDECEC;
 }
 
-table.dataframe {
-  width: fit-content;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: 16px;
-  background: var(--mloda-card);
-}
-table.dataframe th,
-table.dataframe td {
-  padding: 0.3em 0.8em;
-  border: 0;
-  font-family: var(--mloda-sans);
-}
-/* Outranks marimo's striped rows. */
-table.dataframe tbody tr:nth-child(n) {
-  background: none;
-}
-table.dataframe td.brake {
-  color: var(--mloda-red-strong);
-  font-weight: 700;
-}
-
 pre.trace {
   padding: 20px 24px;
   border-radius: 16px;
@@ -119,21 +97,4 @@ pre.trace mark {
   border-radius: 4px;
   background: var(--mloda-highlight);
   color: var(--mloda-ink);
-}
-
-.markdown .codehilite {
-  border-radius: 16px;
-  background: var(--mloda-code);
-}
-.markdown .codehilite pre,
-.markdown .codehilite code {
-  background: none;
-  color: var(--mloda-on-dark);
-  font-family: var(--mloda-mono);
-}
-.markdown .codehilite .gd {
-  color: #F87171;
-}
-.markdown .codehilite .gi {
-  color: #4FC578;
 }
