@@ -13,8 +13,11 @@ def _():
     import marimo as mo
 
     from mloda_demo.one_process import mloda_run
+    from mloda_demo.physical_ai.readers import DepthPng, TumDepth
+    from mloda_demo.physical_ai.runner import run
+    from mloda_demo.physical_ai.trace import trace_html
 
-    return mloda_run, mo
+    return DepthPng, TumDepth, mloda_run, mo, run, trace_html
 
 
 @app.cell(hide_code=True)
@@ -74,6 +77,23 @@ def _(mloda_run):
     mloda_run(
         ["tum__metres__nearest__stop", "redwood__metres__nearest__stop", "sim__metres__nearest__stop"],
         title="Robotics: log, sim, synthetic",
+    )
+    return
+
+
+@app.cell(hide_code=True)
+def _(DepthPng, TumDepth, mo, run, trace_html):
+    # The OpenTelemetry receipt: one line per step, from the raw reading to the answer.
+    _call = (
+        'mloda.run_all([\n    Feature("stop"), ...\n], function_extender={OtelExtender(tracer_provider=provider)}, ...)'
+    )
+    mo.vstack(
+        [
+            mo.md("## When a feature looks wrong: the receipt"),
+            mo.Html(f'<pre class="call"><code>{_call}</code></pre>'),
+            mo.Html(trace_html(run(DepthPng))),
+            mo.Html(trace_html(run(TumDepth))),
+        ]
     )
     return
 

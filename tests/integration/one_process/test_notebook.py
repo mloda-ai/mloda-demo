@@ -22,6 +22,8 @@ def test_every_beat_draws_its_picture():
     pictures = [output for output in outputs if isinstance(output, Lineage)]
     assert [len(picture.features) for picture in pictures] == [2, 2, 2, 2, 3]
     assert all(picture.title for picture in pictures), "a beat without a title makes a slide without a heading"
+    receipts = sum(getattr(output, "text", "").count('<pre class="trace">') for output in outputs)
+    assert receipts == 2, "the receipt slide shows the generic PNG run and the TUM run"
 
 
 def test_notebook_never_imports_torch():
