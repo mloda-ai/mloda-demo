@@ -1,0 +1,9 @@
+invoice,customer,amount,refunded
+F-1001,Acme,1200,0
+F-1002,Birch,800,80
+F-1003,Acme,450,0
+F-1004,Cobalt,3000,300
+F-1005,Birch,600,0
+F-1006,Acme,900,90
+F-1007,Cobalt,1500,0
+F-1008,Dune,700,0

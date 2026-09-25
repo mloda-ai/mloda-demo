@@ -54,5 +54,5 @@ jobs:
         run: uv run --no-sync python -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('torch') is not None)"
 
       - name: Physical AI tests
-        run: uv run --no-sync --with pytest pytest tests/unit/physical_ai tests/integration/physical_ai
+        run: uv run --no-sync --with pytest pytest tests/unit/physical_ai tests/integration/physical_ai tests/unit/one_process tests/integration/one_process
         timeout-minutes: 10
