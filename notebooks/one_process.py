@@ -23,7 +23,7 @@ def _(mo):
     # One Pipeline, Any Device
     ## Swap the reader, not the pipeline
 
-    Tom Kaltofen, mloda.ai
+    Tom Kaltofen · Berlin Physical AI, ML, and CV Meetup · w3.hub, 25 September 2026
     """)
     return
 
