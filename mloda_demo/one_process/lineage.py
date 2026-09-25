@@ -91,14 +91,26 @@ class Lineage:
         # A fresh salt per picture keeps element ids unique when several pictures share one page.
         with matplotlib.rc_context({"svg.hashsalt": uuid.uuid4().hex}):
             figure.savefig(buffer, format="svg", transparent=True, bbox_inches="tight", metadata={"Date": None})
-        # Every column takes the same share of the page, so boxes keep one size from picture to picture.
+        # Every column takes the same share of the page, so boxes keep one size from picture to picture;
+        # a tall picture shrinks from the left edge when the stylesheet caps its height.
         share = min(100, COLUMN_SHARE * max(len(chain) for chain in chains))
-        return re.sub(r'width="[\d.]+pt" height="[\d.]+pt"', f'width="{share}%"', buffer.getvalue(), count=1)
+        return re.sub(
+            r'width="[\d.]+pt" height="[\d.]+pt"',
+            f'width="{share}%" preserveAspectRatio="xMinYMin meet"',
+            buffer.getvalue(),
+            count=1,
+        )
+
+    def call(self) -> str:
+        """The mloda call as the slide shows it: the names and the extender in full, the plumbing as an ellipsis."""
+        features = "".join(f'    Feature("{name}"),\n' for name in self.features)
+        return f"mloda.run_all([\n{features}], function_extender={{OpenLineageExtender(client=client)}}, ...)"
 
     def html(self) -> str:
-        caption = " · ".join(f"{html.escape(name)} {rows(len(self.tables[name]))}" for name in self.features)
         heading = mo.md(f"## {self.title}").text if self.title else ""
-        return f'{heading}<figure class="lineage">{self.svg()}<figcaption>{caption}</figcaption></figure>'
+        call = f'<pre class="call"><code>{html.escape(self.call(), quote=False)}</code></pre>'
+        caption = " · ".join(rows(len(self.tables[name])) for name in self.features)
+        return f'{heading}{call}<figure class="lineage">{self.svg()}<figcaption>{caption}</figcaption></figure>'
 
     def _mime_(self) -> tuple[str, str]:
         """marimo shows the picture when the call is a cell's last expression."""

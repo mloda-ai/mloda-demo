@@ -82,7 +82,8 @@ button[data-testid="marimo-plugin-button"]:hover {
   background: #FDECEC;
 }
 
-pre.trace {
+pre.trace,
+pre.call {
   padding: 20px 24px;
   border-radius: 16px;
   background: var(--mloda-code);
@@ -92,6 +93,10 @@ pre.trace {
   line-height: 1.6;
   overflow-x: auto;
 }
+pre.call {
+  margin: 0;
+  font-size: 1.1rem;
+}
 pre.trace mark {
   padding: 0 0.2em;
   border-radius: 4px;
@@ -99,7 +104,7 @@ pre.trace mark {
   color: var(--mloda-ink);
 }
 
-/* One-process notebook: the four boxes, the pipeline pictures, the close. */
+/* One-process notebook: the four boxes, the call above each pipeline picture, the close. */
 .boxes {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -130,6 +135,7 @@ figure.lineage {
 figure.lineage svg {
   display: block;
   height: auto;
+  max-height: 50vh; /* the three-source picture fits under the call on a 16:9 screen */
 }
 figure.lineage figcaption {
   margin-top: 8px;

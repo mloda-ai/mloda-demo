@@ -57,9 +57,18 @@ def test_a_step_fed_by_two_chains_is_refused():
         _lineage(["joined"], steps).chains()
 
 
-def test_html_holds_the_picture_and_the_row_counts():
+def test_the_call_lists_the_names_and_the_extender():
+    assert _lineage(["a", "b"], []).call().splitlines() == [
+        "mloda.run_all([",
+        '    Feature("a"),',
+        '    Feature("b"),',
+        "], function_extender={OpenLineageExtender(client=client)}, ...)",
+    ]
+
+
+def test_html_holds_the_call_the_picture_and_the_row_counts():
     steps = [Step("Tum", (), ("tum",)), Step("Metres", ("tum",), ("tum__metres",))]
     html = _lineage(["tum__metres"], steps).html()
-    assert "<svg" in html
+    assert html.index('<pre class="call">') < html.index("<svg") < html.index("<figcaption>1 row</figcaption>")
+    assert 'Feature("tum__metres"),' in html
     assert 'width="48%"' in html
-    assert "tum__metres 1 row" in html

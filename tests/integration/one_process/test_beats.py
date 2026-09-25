@@ -57,7 +57,8 @@ def test_a_synthetic_source_joins_the_same_chain():
     assert 'width="96%"' in lineage.html()
 
 
-def test_the_title_heads_the_picture():
+def test_the_title_heads_the_call_and_the_picture():
     html = mloda_run(["tum_stop"], title="Why: two pipelines").html()
-    assert html.index("<h2") < html.index("Why: two pipelines") < html.index("<figure")
-    assert mloda_run(["tum_stop"]).html().startswith("<figure")
+    positions = [html.index(mark) for mark in ("<h2", "Why: two pipelines", '<pre class="call">', "<figure")]
+    assert positions == sorted(positions)
+    assert mloda_run(["tum_stop"]).html().startswith('<pre class="call">')
