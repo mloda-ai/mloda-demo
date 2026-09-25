@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from io import StringIO
 from typing import Any
 
+import marimo as mo
 import matplotlib
 import pandas as pd
 from mloda.community.extenders.openlineage import OpenLineageExtender
@@ -54,11 +55,12 @@ class Step:
 
 @dataclass(frozen=True)
 class Lineage:
-    """The result of one call: a table per requested feature and the completed steps in run order."""
+    """The result of one call: a table per requested feature, the steps in run order, and the picture's heading."""
 
     features: tuple[str, ...]
     tables: dict[str, pd.DataFrame]
     steps: tuple[Step, ...]
+    title: str | None = None
 
     def chain(self, feature: str) -> list[str]:
         """Step labels from the source to the requested feature, read off the events."""
@@ -95,7 +97,8 @@ class Lineage:
 
     def html(self) -> str:
         caption = " · ".join(f"{html.escape(name)} {rows(len(self.tables[name]))}" for name in self.features)
-        return f'<figure class="lineage">{self.svg()}<figcaption>{caption}</figcaption></figure>'
+        heading = mo.md(f"## {self.title}").text if self.title else ""
+        return f'{heading}<figure class="lineage">{self.svg()}<figcaption>{caption}</figcaption></figure>'
 
     def _mime_(self) -> tuple[str, str]:
         """marimo shows the picture when the call is a cell's last expression."""
@@ -112,11 +115,11 @@ def rows(count: int) -> str:
     return "1 row" if count == 1 else f"{count} rows"
 
 
-def run(features: Iterable[str], feature_groups: Iterable[type[FeatureGroup]]) -> Lineage:
+def run(features: Iterable[str], feature_groups: Iterable[type[FeatureGroup]], title: str | None = None) -> Lineage:
     """One mloda call over the requested chains.
 
     Each chain runs in its own group, keyed by the source it starts with, so mloda keeps sources of
-    different length apart instead of joining them.
+    different length apart instead of joining them. The title heads the picture, so one cell makes one slide.
     """
     names = tuple(features)
     transport = RecordingTransport()
@@ -138,4 +141,4 @@ def run(features: Iterable[str], feature_groups: Iterable[type[FeatureGroup]]) -
         for event in transport.events
         if event.eventType == RunState.COMPLETE
     )
-    return Lineage(names, tables, steps)
+    return Lineage(names, tables, steps, title)

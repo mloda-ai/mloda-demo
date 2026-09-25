@@ -36,9 +36,9 @@ FEATURE_GROUPS: frozenset[type[FeatureGroup]] = frozenset(
 )
 
 
-def mloda_run(features: Iterable[str]) -> Lineage:
-    """One mloda call over the requested chains; the result draws itself as the pipeline picture."""
-    return run(features, FEATURE_GROUPS)
+def mloda_run(features: Iterable[str], title: str | None = None) -> Lineage:
+    """One mloda call over the requested chains; the result draws itself as the pipeline picture under the title."""
+    return run(features, FEATURE_GROUPS, title)
 
 
 __all__ = ["FEATURE_GROUPS", "Lineage", "mloda_run", "run"]

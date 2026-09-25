@@ -55,3 +55,9 @@ def test_a_synthetic_source_joins_the_same_chain():
     sim = lineage.tables["sim__metres__nearest__stop"]["sim__metres__nearest__stop"]
     assert sim.tolist() == [False] * 7 + [True] * 3
     assert 'width="96%"' in lineage.html()
+
+
+def test_the_title_heads_the_picture():
+    html = mloda_run(["tum_stop"], title="Why: two pipelines").html()
+    assert html.index("<h2") < html.index("Why: two pipelines") < html.index("<figure")
+    assert mloda_run(["tum_stop"]).html().startswith("<figure")

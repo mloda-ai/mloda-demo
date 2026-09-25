@@ -1,7 +1,11 @@
 import marimo
 
 __generated_with = "0.24.2"
-app = marimo.App(width="medium", css_file="physical_ai.css")
+app = marimo.App(
+    width="medium",
+    layout_file="layouts/one_process.slides.json",
+    css_file="physical_ai.css",
+)
 
 
 @app.cell(hide_code=True)
@@ -26,92 +30,57 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""## One process, two implementations""")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.Html("""
+    _boxes = """
     <div class="boxes">
       <div class="box"><h3>Data engineering</h3><p>batch pipeline</p><p>semantic layer</p></div>
       <div class="box"><h3>ML</h3><p>offline feature</p><p>online feature</p></div>
       <div class="box"><h3>AI agents</h3><p>index, embeddings</p><p>tool call</p></div>
       <div class="box"><h3>Robotics</h3><p>log replay, sim</p><p>on-board</p></div>
     </div>
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""## Why: two pipelines""")
+    """
+    mo.vstack([mo.md("## One process, two implementations"), mo.Html(_boxes)])
     return
 
 
 @app.cell
 def _(mloda_run):
-    mloda_run(["tum_stop", "redwood_stop"])
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""## One definition, small readers""")
+    mloda_run(["tum_stop", "redwood_stop"], title="Why: two pipelines")
     return
 
 
 @app.cell
 def _(mloda_run):
-    mloda_run(["tum__metres__nearest__stop", "redwood__metres__nearest__stop"])
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""## ML: offline, online""")
+    mloda_run(["tum__metres__nearest__stop", "redwood__metres__nearest__stop"], title="One definition, small readers")
     return
 
 
 @app.cell
 def _(mloda_run):
-    mloda_run(["history__monthly_payment", "applicant__monthly_payment"])
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""## Semantic layer: two departments, one revenue""")
+    mloda_run(["history__monthly_payment", "applicant__monthly_payment"], title="ML: offline, online")
     return
 
 
 @app.cell
 def _(mloda_run):
-    mloda_run(["finance__revenue__per_customer", "sales__revenue__per_customer"])
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""## Robotics: log, sim, synthetic""")
+    mloda_run(
+        ["finance__revenue__per_customer", "sales__revenue__per_customer"],
+        title="Semantic layer: two departments, one revenue",
+    )
     return
 
 
 @app.cell
 def _(mloda_run):
-    mloda_run(["tum__metres__nearest__stop", "redwood__metres__nearest__stop", "sim__metres__nearest__stop"])
+    mloda_run(
+        ["tum__metres__nearest__stop", "redwood__metres__nearest__stop", "sim__metres__nearest__stop"],
+        title="Robotics: log, sim, synthetic",
+    )
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
-    mo.md("""## Open""")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.Html("""
+    _close = """
     <div class="close">
       <div>
         <p>Pipelines you can share.</p>
@@ -127,7 +96,8 @@ def _(mo):
         <span>github.com/mloda-ai/mloda-demo</span>
       </div>
     </div>
-    """)
+    """
+    mo.vstack([mo.md("## Open"), mo.Html(_close)])
     return
 
 
