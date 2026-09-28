@@ -41,15 +41,36 @@ Run `mloda-demo --help` for all commands.
 
 ### Physical AI (Berlin Physical AI, ML, and CV Meetup 2026)
 
-Talk: *"One Pipeline, Any Device"*. One distance definition across logs, replay, and a new depth sensor, explained by an OpenTelemetry trace in a marimo notebook. No PyTorch needed.
+Talk: *"One Pipeline, Any Device"*. One definition of the nearest obstacle ahead, two readers, and an OpenTelemetry trace that shows where a wrong number came from. No PyTorch needed.
 
-Two synthetic depth devices, no hardware: Device A logs float32 metres, Device B uint16 millimetres. Only the readers (`DepthReaderA`, `DepthReaderB`) are device-specific; `DepthToMetres`, `Calibration`, `NearestDistance` and `BrakeRule` are one shared definition.
+A real robot: the TUM RGB-D benchmark's Pioneer with a Kinect on top (`freiburg2_pioneer_slam`) drives at a chair. Read through `DepthPng`, a generic 16-bit PNG reader that declares no scale, the conversion assumes millimetres and the robot puts the chair at 2.9 m. Read through `TumDepth`, which declares 5000 per metre, it stops at 0.58 m. Only the readers are device-specific; `DepthToMetres`, `NearestAhead` and `StopRule` are one shared definition, and, with the check on, a reader without a declared scale is refused before the first frame is loaded.
 
 ```bash
 marimo edit notebooks/physical_ai.py
+python scripts/physical_ai_slides.py   # redraws the pipeline pictures for the slides from real runs
 ```
 
 The notebook, plots and talk slides (`slides/physical_ai.pdf`) use the mloda.ai colours with system fonts, and work offline.
+
+Frames in `demo_data/physical_ai/pioneer_slam/` are from the [TUM RGB-D benchmark](https://cvg.cit.tum.de/data/datasets/rgbd-dataset) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)): J. Sturm, N. Engelhard, F. Endres, W. Burgard, D. Cremers, *A Benchmark for the Evaluation of RGB-D SLAM Systems*, IROS 2012.
+
+#### One process, one definition
+
+The talk's second notebook carries the whole talk: title, the four boxes, then one mloda call per beat with the pipeline picture drawn from the call's [OpenLineage](https://openlineage.io/) events (`mloda-community-openlineage`). Every call names two or three chained features, such as `tum__metres__nearest__stop` and `redwood__metres__nearest__stop`; the picture shows the sources in green feeding one shared definition.
+
+```bash
+marimo edit notebooks/one_process.py
+```
+
+| Beat | Call | Sources |
+|---|---|---|
+| Why: two pipelines | `tum_stop`, `redwood_stop` | two welded copies, nothing shared |
+| One definition | `tum__…__stop`, `redwood__…__stop` | the robot's log (TUM, 5000 per metre) and a rendered scene (Redwood, millimetres) |
+| ML | `history__monthly_payment`, `applicant__monthly_payment` | every past credit (UCI German credit) and one request |
+| Semantic layer | `finance__revenue__per_customer`, `sales__revenue__per_customer` | two departments' exports (made up, see `demo_data/one_process/SOURCE.md`) |
+| Robotics | the two above plus `sim__…__stop` | a generated wall delivered as float metres |
+
+Frames in `demo_data/physical_ai/redwood/` are five depth images of the Redwood living-room sequence (a rendered scene) as shipped in Open3D's sample data, http://redwood-data.org/indoor/: S. Choi, Q.-Y. Zhou, V. Koltun, *Robust Reconstruction of Indoor Scenes*, CVPR 2015.
 
 ## Structure
 
@@ -61,10 +82,11 @@ mloda_demo/
 ├── xai/
 │   ├── attribution/              # Zennit LRP + Gradient attribution FGs
 │   └── visualization/            # heatmap renderer
-├── physical_ai/                  # readers, shared definition, runner, trace, plot, style
-demo_data/                        # customer data + trained artifacts; physical_ai/ depth logs
-notebooks/                        # marimo notebook and its CSS for the Physical AI talk
-slides/                           # hook and close slides for the Physical AI talk (HTML source + PDF)
+├── physical_ai/                  # readers, shared definition, welded copies, runner, trace, plot, style
+├── one_process/                  # chained robot, ML and semantic definitions; OpenLineage run and picture
+demo_data/                        # customer data + trained artifacts; physical_ai/ robot clip and Redwood frames
+notebooks/                        # marimo notebooks and their CSS for the Physical AI talk
+slides/                           # Physical AI talk slides (HTML source, pipeline pictures, PDF)
 tests/                            # unit + integration tests
 ```
 
@@ -74,6 +96,7 @@ tests/                            # unit + integration tests
 - [mloda-registry](https://github.com/mloda-ai/mloda-registry): plugins (including the OpenTelemetry extender), guides, and best practices (Apache 2.0)
 - [marimo](https://marimo.io/): reactive Python notebooks (Apache 2.0)
 - [OpenTelemetry](https://opentelemetry.io/): tracing API and SDK (Apache 2.0)
+- [OpenLineage](https://openlineage.io/): lineage events and client (Apache 2.0)
 - [PyTorch](https://pytorch.org/): MLP model training and inference (BSD 3-Clause)
 - [Zennit](https://github.com/chr5tphr/zennit): Layer-wise Relevance Propagation (LGPLv3+)
 - [OpenML](https://www.openml.org/): German Credit dataset source

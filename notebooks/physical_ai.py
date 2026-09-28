@@ -6,206 +6,125 @@ app = marimo.App(width="medium", css_file="physical_ai.css")
 
 @app.cell(hide_code=True)
 def _():
+    import html
+    import inspect
+
     import marimo as mo
 
-    from mloda_demo.physical_ai.definition import ASSUMED_UNITS, FAULTY_UNITS
-    from mloda_demo.physical_ai.plot import top_down
-    from mloda_demo.physical_ai.readers import DepthReaderA, DepthReaderB
-    from mloda_demo.physical_ai.runner import (
-        FEATURES,
-        FOCUS_OBJECT,
-        all_passed,
-        compare,
-        n_table,
-        nearest_points,
-        run,
-    )
-    from mloda_demo.physical_ai.scene import TIMESTAMPS
+    from mloda_demo.physical_ai.clip import CLIP_DIR, frame_index, load_rgb
+    from mloda_demo.physical_ai.plot import frame_view
+    from mloda_demo.physical_ai.readers import DepthPng, TumDepth
+    from mloda_demo.physical_ai.runner import at_frame, closest_frame, run
     from mloda_demo.physical_ai.trace import trace_html
 
     # Run headless (tests, `python notebooks/physical_ai.py`) with every gate open.
     SCRIPT = mo.app_meta().mode == "script"
+    frames = frame_index(CLIP_DIR)
     return (
-        ASSUMED_UNITS,
-        DepthReaderA,
-        DepthReaderB,
-        FAULTY_UNITS,
-        FEATURES,
-        FOCUS_OBJECT,
+        CLIP_DIR,
+        DepthPng,
         SCRIPT,
-        TIMESTAMPS,
-        all_passed,
-        compare,
+        TumDepth,
+        at_frame,
+        closest_frame,
+        frame_view,
+        frames,
+        html,
+        inspect,
+        load_rgb,
         mo,
-        n_table,
-        nearest_points,
         run,
-        top_down,
         trace_html,
     )
 
 
 @app.cell(hide_code=True)
-def _(FOCUS_OBJECT, all_passed, mo, n_table, nearest_points, top_down):
-    def badge(runs):
-        columns = ", ".join(runs)
-        if all_passed(runs.values()):
-            return mo.callout(mo.md(f"**all runs passed**: {columns}"), kind="success")
-        return mo.callout(mo.md(f"**a run failed**: {columns}"), kind="danger")
+def _(CLIP_DIR, at_frame, frame_view, frames, load_rgb):
+    rendered = {}
 
-    def table_view(runs):
-        html = n_table(runs).to_html(border=0)
-        html = html.replace("<td>NO</td>", '<td class="brake">NO</td>')
-        return mo.Html(f'<div style="font-size:1.6em">{html}</div>')
+    def view(result, frame):
+        key = (result.label, frame)
+        if key not in rendered:
+            row = at_frame(result, frame)
+            rgb = load_rgb(CLIP_DIR / frames.loc[frames["frame"] == frame, "rgb"].iloc[0])
+            nearest, stop, t_s = float(row["nearest_ahead_m"]), bool(row["stop"]), float(row["t_s"])
+            rendered[key] = frame_view(rgb, row["depth_m"], nearest, stop, t_s)
+        return rendered[key]
 
-    def comparison(runs):
-        offline, device = runs["offline"], list(runs.values())[-1]
-        ghost = nearest_points(offline).loc[FOCUS_OBJECT]
-        points = nearest_points(device)
-        moved = abs(points.loc[FOCUS_OBJECT, "nearest_distance_m"] - ghost["nearest_distance_m"]) > 1e-3
-        figure = top_down(points, ghost=(ghost["x_m"], ghost["y_m"]) if moved else None, title=device.label)
-        return mo.hstack([figure, table_view(runs)], align="center")
-
-    return badge, comparison, table_view
+    return (view,)
 
 
 @app.cell(hide_code=True)
 def _(mo):
     mo.md("""
-    ## Offline: Device A logs become training data
-    Synthetic devices, no hardware. Brake below 2 m.
+    ## The robot and the chair
+    Freiburg. A Pioneer robot with a Kinect on top. Stop below 1 m.
     """)
     return
 
 
 @app.cell
-def _(DepthReaderA, nearest_points, run, top_down):
-    offline = run(DepthReaderA)
-    top_down(nearest_points(offline), title="offline: device A logs")
-    return
-
-
-@app.cell(hide_code=True)
-def _(TIMESTAMPS, mo):
-    frame = mo.ui.slider(0, len(TIMESTAMPS) - 1, value=len(TIMESTAMPS) - 1, label="replay frame", show_value=True)
-    mo.vstack([mo.md("## Online: the same definition, frame by frame (a Python replay)"), frame])
-    return (frame,)
-
-
-@app.cell
-def _(DepthReaderA, frame, nearest_points, run, top_down):
-    online = run(DepthReaderA, label="online", replay_until=frame.value)
-    top_down(nearest_points(online, frame.value), title=f"online replay, frame {frame.value}")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    ## n: the new vendor
-    """)
-    return
-
-
-@app.cell
-def _(DepthReaderA, DepthReaderB):
-    reader = DepthReaderA  # the new vendor: DepthReaderB
+def _(DepthPng, TumDepth):
+    reader = DepthPng  # the TUM reader: TumDepth
     return (reader,)
 
 
 @app.cell(hide_code=True)
-def _(compare, fault, reader):
-    runs = compare(reader, fault=fault)
-    return (runs,)
+def _(reader, run):
+    result = run(reader)
+    return (result,)
 
 
 @app.cell(hide_code=True)
-def _(mo):
-    show_badge = mo.ui.run_button(label="show result")
-    show_plot = mo.ui.run_button(label="compare")
-    mo.hstack([show_badge, show_plot], justify="start")
-    return show_badge, show_plot
+def _(frames, mo, reader):
+    # Recreated on a reader swap, so the replay starts again at the first frame.
+    replay = mo.ui.slider(
+        steps=frames["frame"].tolist(), value=0, label=f"frame ({reader.label})", show_value=True, full_width=True
+    )
+    mo.hstack([replay])
+    return (replay,)
 
 
 @app.cell(hide_code=True)
-def _(SCRIPT, badge, mo, runs, show_badge):
-    mo.stop(not (show_badge.value or SCRIPT))
-    badge(runs)
+def _(replay, result, view):
+    view(result, replay.value)
     return
 
 
 @app.cell(hide_code=True)
-def _(SCRIPT, comparison, mo, runs, show_plot):
-    mo.stop(not (show_plot.value or SCRIPT))
-    comparison(runs)
+def _(mo, replay, result, trace_html):
+    mo.vstack([mo.md("## The receipt"), mo.Html(trace_html(result, replay.value))])
     return
 
 
 @app.cell(hide_code=True)
-def _(mo, runs, trace_html):
-    device_run = list(runs.values())[-1]
-    mo.vstack([mo.md("## Trace: where the number came from"), mo.Html(trace_html(device_run))])
-    return
-
-
-@app.cell(hide_code=True)
-def _(ASSUMED_UNITS, FAULTY_UNITS, mo):
-    fix = mo.ui.switch(label="apply the fix")
-    diff = f"```diff\n # DepthToMetres: unit assumed per raw encoding\n-{FAULTY_UNITS}\n+{ASSUMED_UNITS}\n```"
-    mo.vstack([mo.md(diff), fix])
-    return (fix,)
-
-
-@app.cell
-def _(fix):
-    fault = not fix.value
-    return (fault,)
-
-
-@app.cell(hide_code=True)
-def _(comparison, runs):
-    comparison(runs)
+def _(TumDepth, html, inspect, mo):
+    source = html.escape(inspect.getsource(TumDepth))
+    source = source.replace("scale = 5000  # per metre", "<mark>scale = 5000  # per metre</mark>", 1)
+    mo.vstack([mo.md("## Swap the reader"), mo.Html(f'<pre class="trace">{source}</pre>')])
     return
 
 
 @app.cell(hide_code=True)
 def _(mo):
     rerun_broken = mo.ui.run_button(label="rerun the broken setup")
-    mo.vstack([mo.md("## Make it a check: the conversion declares the unit it assumes"), rerun_broken])
+    mo.vstack([mo.md("## Make it a check: the conversion needs a declared scale"), rerun_broken])
     return (rerun_broken,)
 
 
-@app.cell
-def _(DepthReaderB, run):
-    checked = run(DepthReaderB, fault=True, check_units=True)
+@app.cell(hide_code=True)
+def _(SCRIPT, DepthPng, mo, rerun_broken, run):
+    mo.stop(not (rerun_broken.value or SCRIPT))
+    checked = run(DepthPng, check=True)
+    mo.callout(mo.md(checked.error or "no error"), kind="danger" if checked.error else "success")
     return (checked,)
 
 
 @app.cell(hide_code=True)
-def _(SCRIPT, checked, mo, rerun_broken):
-    mo.stop(not (rerun_broken.value or SCRIPT))
-    mo.callout(mo.md(checked.error or "no error"), kind="danger" if checked.error else "success")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    ask = mo.ui.run_button(label="ask")
-    mo.vstack([mo.md("## Next question: which object is approaching?"), ask])
-    return (ask,)
-
-
-@app.cell
-def _(FEATURES, compare, fault, reader):
-    asked = compare(reader, fault=fault, features=(*FEATURES, "approaching"))
-    return (asked,)
-
-
-@app.cell(hide_code=True)
-def _(SCRIPT, ask, asked, mo, table_view):
-    mo.stop(not (ask.value or SCRIPT))
-    table_view(asked)
-    return
+def _(closest_frame, result):
+    # Headless runs report the chair frame; on stage the slider does.
+    chair = closest_frame(result)
+    return (chair,)
 
 
 if __name__ == "__main__":

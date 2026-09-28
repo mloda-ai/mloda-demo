@@ -5,8 +5,10 @@ import sys
 from pathlib import Path
 from types import ModuleType
 
+import pytest
+
 from mloda_demo.physical_ai import style
-from mloda_demo.physical_ai.readers import DepthReaderB
+from mloda_demo.physical_ai.readers import TumDepth
 
 NOTEBOOK = Path(__file__).resolve().parents[3] / "notebooks" / "physical_ai.py"
 CSS = NOTEBOOK.with_suffix(".css")
@@ -21,19 +23,20 @@ def _notebook() -> ModuleType:
     return module
 
 
-def test_every_beat_runs_with_the_new_vendor_line_changed() -> None:
-    _, defs = _notebook().app.run(defs={"reader": DepthReaderB})
-    n_table = defs["n_table"]
-    assert list(n_table(defs["runs"]).loc["brake"]) == ["yes", "yes", "NO"]
-    assert list(n_table(defs["asked"]).loc["approaching"]) == ["3", "3", "3"]
-    assert defs["checked"].error == "DepthToMetres assumes uint16 depth in cm, but DepthReaderB delivers mm"
+def test_every_beat_runs_with_the_generic_reader() -> None:
+    _, defs = _notebook().app.run()
+    assert defs["chair"] == 53
+    row = defs["at_frame"](defs["result"], defs["chair"])
+    assert float(row["nearest_ahead_m"]) == pytest.approx(2.915, abs=0.005)
+    assert not bool(row["stop"])
+    assert defs["checked"].error == "DepthToMetres needs a declared scale; DepthPng delivers uint16 without one"
 
 
-def test_the_fix_brings_every_column_back_to_brake() -> None:
-    _, defs = _notebook().app.run(defs={"reader": DepthReaderB, "fault": False})
-    table = defs["n_table"](defs["runs"])
-    assert list(table.loc["object 7"]) == ["1.2 m", "1.2 m", "1.2 m"]
-    assert list(table.loc["brake"]) == ["yes", "yes", "yes"]
+def test_the_tum_reader_stops_for_the_chair() -> None:
+    _, defs = _notebook().app.run(defs={"reader": TumDepth})
+    row = defs["at_frame"](defs["result"], defs["chair"])
+    assert float(row["nearest_ahead_m"]) == pytest.approx(0.583, abs=0.005)
+    assert bool(row["stop"])
 
 
 def test_physical_ai_code_never_imports_torch() -> None:
@@ -62,7 +65,9 @@ def _contrast(foreground: str, background: str) -> float:
 def test_notebook_css_and_slides_work_offline_and_mirror_the_palette() -> None:
     assert f'css_file="{CSS.name}"' in NOTEBOOK.read_text()
     css = CSS.read_text()
-    assert not any(remote in css + SLIDES.read_text() for remote in ("url(", "@import", "http"))
+    # Inlined data URIs (the logo) are fine offline; anything else referenced is not.
+    sources = re.sub(r'url\("data:[^"]*"\)', "", css + SLIDES.read_text())
+    assert not any(remote in sources for remote in ("url(", "@import", "http"))
     tokens = dict(re.findall(r"--mloda-([a-z-]+): (#[0-9A-F]{6});", css))
     assert tokens == {
         "green": style.GREEN,
