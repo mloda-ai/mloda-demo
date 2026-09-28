@@ -103,17 +103,23 @@ def _(mo):
     _close = """
     <div class="close">
       <div>
-        <p>Pipelines you can share.</p>
-        <p>Runs you can reproduce.</p>
-        <p>A process you certify once.</p>
-        <p class="muted">Early days. A bet.</p>
+        <p>One process, shared.</p>
+        <p>Computation. Meaning. Portability. Standards.</p>
+        <p>Runs you can reproduce. A process you certify once.</p>
       </div>
       <div class="qr">
-        <svg viewBox="-4 -4 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code: github.com/mloda-ai/mloda-demo">
+        <svg viewBox="-4 -4 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code: github.com/mloda-ai/mloda">
           <rect x="-4" y="-4" width="37" height="37" fill="#FFFFFF"/>
-          <path stroke="#0E120F" d="M0 0.5h7m1 0h4m2 0h1m2 0h2m3 0h7m-29 1h1m5 0h1m4 0h2m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m2 0h3m1 0h1m1 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h2m1 0h2m2 0h3m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m4 0h1m2 0h2m3 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m1 0h2m1 0h1m1 0h2m7 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-19 1h3m1 0h1m1 0h1m1 0h1m1 0h1m-21 1h1m1 0h1m3 0h2m1 0h2m2 0h4m1 0h1m1 0h1m2 0h1m2 0h1m1 0h1m-28 1h3m1 0h1m1 0h2m1 0h1m1 0h1m2 0h3m1 0h5m3 0h2m-27 1h2m2 0h1m1 0h1m4 0h3m1 0h1m1 0h1m2 0h5m1 0h1m-28 1h3m1 0h1m3 0h2m5 0h1m1 0h1m1 0h2m2 0h2m-23 1h1m2 0h1m1 0h2m1 0h4m1 0h1m3 0h1m1 0h2m4 0h1m-29 1h1m1 0h4m1 0h1m2 0h4m1 0h1m3 0h2m1 0h2m3 0h2m-29 1h3m3 0h1m1 0h5m2 0h1m1 0h3m1 0h4m3 0h1m-29 1h1m2 0h1m3 0h1m1 0h2m2 0h1m4 0h3m1 0h2m-24 1h2m2 0h1m1 0h1m1 0h2m3 0h1m1 0h2m3 0h3m5 0h1m-27 1h1m2 0h1m4 0h3m2 0h3m1 0h1m2 0h2m2 0h3m-29 1h3m1 0h6m1 0h1m1 0h7m4 0h2m2 0h1m-22 1h4m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m-25 1h3m3 0h1m2 0h1m1 0h1m1 0h4m1 0h1m1 0h6m1 0h1m-20 1h2m1 0h7m2 0h1m3 0h3m1 0h1m-29 1h7m1 0h1m2 0h1m3 0h1m4 0h1m1 0h1m1 0h1m3 0h1m-29 1h1m5 0h1m4 0h3m1 0h2m1 0h3m3 0h1m3 0h1m-29 1h1m1 0h3m1 0h1m3 0h2m1 0h1m2 0h1m2 0h7m2 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m3 0h3m1 0h3m2 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m2 0h6m3 0h1m2 0h1m2 0h2m-29 1h1m5 0h1m3 0h1m1 0h3m1 0h1m1 0h1m1 0h1m2 0h3m-26 1h7m1 0h3m5 0h1m3 0h1m3 0h2m2 0h1"/>
+          <path stroke="#0E120F" d="M0 0.5h7m3 0h2m3 0h4m3 0h7m-29 1h1m5 0h1m1 0h3m1 0h3m1 0h1m3 0h1m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m1 0h3m1 0h1m2 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m7 0h2m1 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h2m2 0h2m1 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m5 0h1m2 0h1m3 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h3m1 0h1m1 0h3m3 0h1m-21 1h1m5 0h1m1 0h1m1 0h3m4 0h3m1 0h2m2 0h3m-27 1h1m2 0h1m3 0h4m1 0h1m2 0h4m1 0h1m1 0h2m1 0h2m-28 1h5m1 0h1m2 0h1m1 0h5m4 0h1m3 0h1m-25 1h5m2 0h3m3 0h1m6 0h2m3 0h1m-26 1h1m2 0h1m2 0h1m2 0h1m1 0h1m1 0h1m1 0h2m3 0h1m1 0h2m4 0h1m-29 1h3m2 0h1m1 0h6m5 0h3m1 0h3m2 0h2m-28 1h6m3 0h1m1 0h1m2 0h2m1 0h1m1 0h2m2 0h3m-27 1h3m2 0h1m1 0h3m6 0h1m2 0h1m3 0h2m1 0h1m1 0h1m-27 1h1m2 0h2m4 0h1m3 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h2m-27 1h1m1 0h3m2 0h1m1 0h11m2 0h3m1 0h3m-29 1h4m2 0h3m2 0h1m3 0h5m4 0h2m2 0h1m-29 1h1m1 0h1m6 0h3m1 0h1m2 0h1m3 0h1m1 0h1m-23 1h1m1 0h2m2 0h2m6 0h2m1 0h8m1 0h3m-21 1h2m4 0h2m1 0h2m1 0h1m3 0h2m-26 1h7m2 0h1m2 0h1m2 0h3m1 0h2m1 0h1m1 0h3m-27 1h1m5 0h1m3 0h3m1 0h3m2 0h2m3 0h1m2 0h1m-28 1h1m1 0h3m1 0h1m2 0h2m2 0h2m1 0h1m2 0h7m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h2m1 0h8m3 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m4 0h1m1 0h3m3 0h9m-28 1h1m5 0h1m2 0h2m2 0h1m8 0h2m1 0h2m1 0h1m-29 1h7m1 0h1m3 0h1m1 0h1m2 0h1m1 0h1m2 0h3m1 0h1"/>
         </svg>
-        <span>github.com/mloda-ai/mloda-demo</span>
+        <span>github.com/mloda-ai/mloda</span>
+      </div>
+      <div class="qr">
+        <svg viewBox="-4 -4 37 37" shape-rendering="crispEdges" role="img" aria-label="QR code: linkedin.com/in/tomkaltofen">
+          <rect x="-4" y="-4" width="37" height="37" fill="#FFFFFF"/>
+          <path stroke="#0E120F" d="M0 0.5h7m2 0h3m1 0h2m3 0h1m3 0h7m-29 1h1m5 0h1m1 0h7m1 0h2m2 0h1m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m1 0h2m2 0h1m3 0h1m2 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h3m2 0h1m1 0h3m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m5 0h1m3 0h5m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m3 0h2m2 0h1m7 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h4m2 0h1m1 0h1m2 0h2m-21 1h1m5 0h1m1 0h3m1 0h8m1 0h2m2 0h3m-28 1h1m1 0h1m4 0h1m5 0h3m1 0h4m2 0h2m1 0h2m-28 1h8m1 0h1m2 0h4m1 0h1m4 0h1m-22 1h1m3 0h1m1 0h3m1 0h2m3 0h1m2 0h2m2 0h1m1 0h1m-22 1h4m2 0h3m1 0h1m1 0h1m3 0h1m1 0h2m4 0h1m-29 1h1m3 0h2m2 0h4m1 0h1m1 0h6m1 0h1m1 0h1m2 0h2m-29 1h4m1 0h3m2 0h1m2 0h4m1 0h1m1 0h4m1 0h2m-26 1h1m2 0h2m3 0h2m1 0h1m3 0h1m3 0h5m1 0h1m1 0h1m-29 1h1m2 0h1m2 0h1m2 0h1m2 0h1m2 0h1m1 0h1m1 0h1m3 0h1m1 0h2m-27 1h1m2 0h1m3 0h1m1 0h3m3 0h6m1 0h3m1 0h3m-29 1h2m1 0h2m1 0h1m2 0h1m1 0h5m3 0h2m4 0h1m2 0h1m-29 1h1m2 0h2m10 0h1m2 0h1m1 0h1m1 0h3m-25 1h1m5 0h5m1 0h1m4 0h2m1 0h5m1 0h3m-21 1h1m1 0h1m2 0h3m1 0h2m1 0h1m3 0h2m-26 1h7m2 0h1m1 0h7m1 0h2m1 0h1m1 0h3m-27 1h1m5 0h1m4 0h1m1 0h1m2 0h1m2 0h2m3 0h1m-25 1h1m1 0h3m1 0h1m2 0h3m1 0h1m2 0h1m2 0h7m1 0h1m-28 1h1m1 0h3m1 0h1m2 0h1m2 0h2m1 0h2m2 0h1m1 0h1m1 0h1m1 0h2m1 0h1m-29 1h1m1 0h3m1 0h1m7 0h3m2 0h1m1 0h7m-28 1h1m5 0h1m2 0h3m1 0h3m2 0h1m4 0h1m1 0h2m1 0h1m-29 1h7m1 0h3m1 0h1m1 0h1m2 0h1m1 0h1m2 0h5"/>
+        </svg>
+        <span>linkedin.com/in/tomkaltofen</span>
       </div>
     </div>
     """

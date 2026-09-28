@@ -146,9 +146,13 @@ figure.lineage figcaption {
 .close {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
+  justify-content: flex-start;
+  gap: 48px;
   margin: 8px 0 24px;
+}
+.close > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .close p {
   margin: 0 0 8px;
@@ -162,17 +166,18 @@ figure.lineage figcaption {
   color: var(--mloda-muted);
 }
 .qr {
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: var(--mloda-mono);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--mloda-muted);
 }
 .qr svg {
-  width: 200px;
-  height: 200px;
+  width: 340px;
+  height: 340px;
   border-radius: 8px;
 }
 
