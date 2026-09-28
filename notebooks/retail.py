@@ -10,23 +10,10 @@ app = marimo.App(
 
 @app.cell(hide_code=True)
 def _():
-    import marimo as mo
-
     from mloda_demo.retail import CUSTOMER, Agent, checkout, org
 
     agent = Agent()
-    return CUSTOMER, agent, checkout, mo, org
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md("""
-    # Online, Offline, n-Chaos
-    ## One definition, wherever it is called
-
-    Tom Kaltofen · Feature Store Summit · 6 October 2026
-    """)
-    return
+    return CUSTOMER, agent, checkout, org
 
 
 @app.cell(hide_code=True)
