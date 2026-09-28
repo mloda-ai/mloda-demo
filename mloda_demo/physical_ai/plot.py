@@ -46,13 +46,15 @@ def frame_view(rgb: NDArray[np.uint8], depth_m: NDArray[np.float64], nearest: fl
 @matplotlib.rc_context(MATPLOTLIB)
 def pipeline_graph(chains: Sequence[Sequence[str]]) -> Figure:
     """Boxes and arrows, one row per chain; a step every chain has is drawn once, after each chain's own steps."""
-    shared = [step for step in chains[0] if all(step in chain for chain in chains[1:])]
+    shared = [step for step in chains[0] if all(step in chain for chain in chains[1:])] if len(chains) > 1 else []
     own = [[step for step in chain if step not in shared] for chain in chains]
     if any(not steps for steps in own):
         raise ValueError("every chain needs a step of its own before the shared ones")
     rows = len(chains)
     columns = max(len(chain) for chain in chains)
-    figure = Figure(figsize=(2.6 * columns + 0.6, 1.5 * rows + 0.6))
+    # A column wide enough for the longest label at the box font size.
+    width = max(2.6, 0.13 * max(len(step) for chain in chains for step in chain) + 1.0)
+    figure = Figure(figsize=(width * columns + 0.6, 1.5 * rows + 0.6))
     axes = figure.add_subplot()
     axes.set_xlim(-0.5, columns - 0.5)
     axes.set_ylim(-0.5, rows - 0.5)

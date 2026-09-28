@@ -65,7 +65,9 @@ def _contrast(foreground: str, background: str) -> float:
 def test_notebook_css_and_slides_work_offline_and_mirror_the_palette() -> None:
     assert f'css_file="{CSS.name}"' in NOTEBOOK.read_text()
     css = CSS.read_text()
-    assert not any(remote in css + SLIDES.read_text() for remote in ("url(", "@import", "http"))
+    # Inlined data URIs (the logo) are fine offline; anything else referenced is not.
+    sources = re.sub(r'url\("data:[^"]*"\)', "", css + SLIDES.read_text())
+    assert not any(remote in sources for remote in ("url(", "@import", "http"))
     tokens = dict(re.findall(r"--mloda-([a-z-]+): (#[0-9A-F]{6});", css))
     assert tokens == {
         "green": style.GREEN,

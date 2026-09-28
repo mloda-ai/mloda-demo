@@ -5,12 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mloda-demo"
 version = "0.1.0"
-description = "Live demos built on mloda: credit risk with XAI attribution, and Physical AI sensor features with OpenTelemetry traces."
+description = "Live demos built on mloda: credit risk with XAI attribution, and Physical AI sensor features with OpenTelemetry traces and OpenLineage pictures."
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
     "mloda>=0.13.0,<0.14.0",
     "mloda-community-otel>=0.4.7",
+    "mloda-community-openlineage>=0.4.7",
     "opentelemetry-sdk>=1.30,<2",
     "marimo",
     "pandas",
@@ -40,22 +41,25 @@ dev = [
     "bandit",
 ]
 
-# Load spans and declared span attributes are not released yet; switch back to PyPI after the next registry release.
+# Load spans, declared span attributes and step-level OpenLineage inputs are not released yet.
+# 816953a is the last registry commit that still pins mloda 0.13; switch back to PyPI after the next release.
 [tool.uv.sources]
-mloda-community-otel = { git = "https://github.com/mloda-ai/mloda-registry", rev = "895167d4ccd6dd9b73e970d022d053bb86dadbd3", subdirectory = "mloda/community/extenders/otel" }
+mloda-community-otel = { git = "https://github.com/mloda-ai/mloda-registry", rev = "816953a7c9a451e2c2ce65d1340cd09d5be59056", subdirectory = "mloda/community/extenders/otel" }
+mloda-community-openlineage = { git = "https://github.com/mloda-ai/mloda-registry", rev = "816953a7c9a451e2c2ce65d1340cd09d5be59056", subdirectory = "mloda/community/extenders/openlineage" }
 
 [tool.uv]
 override-dependencies = [
-    "mloda-community-extenders-shared @ git+https://github.com/mloda-ai/mloda-registry@895167d4ccd6dd9b73e970d022d053bb86dadbd3#subdirectory=mloda/community/extenders/shared",
+    "mloda-community-extenders-shared @ git+https://github.com/mloda-ai/mloda-registry@816953a7c9a451e2c2ce65d1340cd09d5be59056#subdirectory=mloda/community/extenders/shared",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["mloda_demo*"]
 
-# notebooks/physical_ai.css styles the light theme only.
+# notebooks/physical_ai.css styles the light theme only; the code font is sized for a projector.
 [tool.marimo.display]
 theme = "light"
+code_editor_font_size = 18
 
 [tool.pytest.ini_options]
 testpaths = ["mloda_demo", "tests"]
