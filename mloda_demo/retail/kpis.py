@@ -125,8 +125,8 @@ class LastReturn(Kpi, FeatureGroup):
         customer = data["customer_id"]
         returns = cancelled(data) & (data["invoice_date"] < as_of(features))
         data["last_return"] = data["invoice_date"].where(returns).groupby(customer).transform("max")
-        latest = returns & (data["invoice_date"] == data["last_return"])
-        last_invoice = data["invoice"].where(latest).groupby(customer).transform("max")
+        latest = data[returns & (data["invoice_date"] == data["last_return"])]
+        last_invoice = customer.map(latest.groupby("customer_id")["invoice"].max())
         value = data["line_value"].where(data["invoice"] == last_invoice, 0).groupby(customer).transform("sum")
         data["last_return_value"] = -value + 0.0  # + 0.0 turns -0.0 into 0.0
         return data
