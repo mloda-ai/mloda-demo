@@ -23,7 +23,7 @@ def read_workbook(path: str | None) -> dict[str, pd.DataFrame]:
     if path is not None:
         return pd.read_excel(path, sheet_name=None)
     # URL is a fixed https address.
-    with urllib.request.urlopen(URL) as response:  # nosec B310
+    with urllib.request.urlopen(URL, timeout=60) as response:  # nosec B310
         archive = zipfile.ZipFile(io.BytesIO(response.read()))
     with archive.open("online_retail_II.xlsx") as workbook:
         return pd.read_excel(workbook, sheet_name=None)

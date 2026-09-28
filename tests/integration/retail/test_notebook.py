@@ -1,12 +1,23 @@
 import importlib.util
 import subprocess  # nosec B404
 import sys
+from collections.abc import Iterator
 from pathlib import Path
 from types import ModuleType
 
+import pytest
+
 from mloda_demo.retail.agent import Slide
+from mloda_demo.retail.store import STORE
 
 NOTEBOOK = Path(__file__).resolve().parents[3] / "notebooks" / "retail.py"
+
+
+@pytest.fixture(autouse=True)
+def empty_store() -> Iterator[None]:
+    STORE.clear()
+    yield
+    STORE.clear()
 
 
 def _notebook() -> ModuleType:
@@ -29,6 +40,8 @@ def test_every_step_renders_a_slide():
         "5 · Ask something new",
     ]
     assert len(slides) == 8, "org, checkout, the opening question and the five steps"
+    assert all("retail-answer" in slide._mime_()[1] for slide in slides[2:]), "every question gets an answer"
+    assert 'css_file="physical_ai.css"' in NOTEBOOK.read_text()
 
 
 def test_notebook_never_imports_torch():

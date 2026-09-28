@@ -53,6 +53,6 @@ jobs:
       - name: PyTorch is not installed
         run: uv run --no-sync python -c "import importlib.util, sys; sys.exit(importlib.util.find_spec('torch') is not None)"
 
-      - name: Physical AI tests
+      - name: Physical AI and retail tests
         run: uv run --no-sync --with pytest pytest tests/unit/physical_ai tests/integration/physical_ai tests/unit/one_process tests/integration/one_process tests/unit/retail tests/integration/retail
         timeout-minutes: 10

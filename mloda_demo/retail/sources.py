@@ -10,7 +10,7 @@ from mloda.provider import INPUT_DATA_STAGE, BaseInputData, FeatureGroup, Featur
 from mloda.user import Options
 
 from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
-from mloda_demo.one_process.chain import PandasOnly
+from mloda_demo.pandas_only import PandasOnly
 
 LEDGER = DEMO_DATA_DIR / "retail" / "ledger.csv.gz"
 COLUMNS = ("invoice", "customer_id", "invoice_date", "quantity", "price")

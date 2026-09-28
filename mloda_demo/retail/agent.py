@@ -11,11 +11,11 @@ from typing import Any
 
 import pandas as pd
 from mloda.provider import FeatureGroup, FeatureResolutionError
-from mloda.user import Feature, Options, PluginCollector, get_feature_group_docs, mloda
+from mloda.user import Feature, Options, PlanStep, PluginCollector, get_feature_group_docs, mloda
 
-from mloda_demo.retail.kpis import FEATURE_GROUPS, LIMIT, NetSpend30d, PayLater, kpi_of
+from mloda_demo.retail.kpis import FEATURE_GROUPS, LIMIT, NetSpend30d, PayLater, kpi_of, needs_of
 from mloda_demo.retail.picture import OWNER_COLOURS, svg
-from mloda_demo.retail.sources import AS_OF, LEDGER, MarketingExport, Orders, OrderSource, ShopLedger
+from mloda_demo.retail.sources import AS_OF, LEDGER, NEEDS, MarketingExport, Orders, OrderSource, ShopLedger
 from mloda_demo.retail.store import CUSTOMER as STORE_CUSTOMER
 from mloda_demo.retail.store import STORE, FeatureStore
 
@@ -37,19 +37,33 @@ class Run:
         return rows[name].iloc[0]
 
 
+def source_of(names: Sequence[str], source: type[OrderSource] | None = None) -> type[OrderSource]:
+    """The given source, else the first number's own source."""
+    kpi = kpi_of(names[0])
+    return source or (kpi.SOURCE if kpi else ShopLedger)
+
+
+def request(names: Sequence[str], source: type[OrderSource] | None = None) -> list[Feature | str]:
+    """The features at the checkout; one group for all of them, so they share one read of the source."""
+    group: dict[str, Any] = {source_of(names, source).__name__: str(LEDGER), AS_OF: CHECKOUT}
+    needs = next((needs for needs in map(needs_of, names) if needs), None)
+    if needs is not None:
+        group[NEEDS] = needs
+    return [Feature(name, Options(group=dict(group))) for name in names]
+
+
 def run(names: Sequence[str], *, source: type[OrderSource] | None = None, customer: int | None = None) -> Run:
     """One mloda run at the checkout. With `customer`, the store answers; otherwise the definitions do."""
     if customer is not None:
-        group: dict[Any, Any] = {AS_OF: CHECKOUT, STORE_CUSTOMER: customer}
-        groups, requested = STORE_GROUPS, list(names)
+        group = {AS_OF: CHECKOUT, STORE_CUSTOMER: customer}
+        features: list[Feature | str] = [Feature(name, Options(group=dict(group))) for name in names]
+        groups = STORE_GROUPS
     else:
-        kpi = kpi_of(names[0])
-        group = {source or (kpi.SOURCE if kpi else ShopLedger): str(LEDGER), AS_OF: CHECKOUT}
-        groups, requested = DEFINITION_GROUPS, [*names, "customer_id"]
+        groups, features = DEFINITION_GROUPS, request([*names, "customer_id"], source)
     start = time.perf_counter()
     try:
         frames = mloda.run_all(
-            [Feature(name, Options(group=dict(group))) for name in requested],
+            features,
             compute_frameworks=["PandasDataFrame"],
             plugin_collector=PluginCollector.enabled_feature_groups(set(groups)),
         )
@@ -65,14 +79,18 @@ def run(names: Sequence[str], *, source: type[OrderSource] | None = None, custom
     return Run(pd.concat(list(frames), axis=1), took)
 
 
-def plan(names: Sequence[str], source: type[OrderSource] = ShopLedger) -> str:
-    """The plan picture, from mloda's resolved plan; nothing is computed."""
-    steps = mloda.explain(
-        [Feature(name, Options(group={source.__name__: str(LEDGER), AS_OF: CHECKOUT})) for name in names],
+def steps(names: Sequence[str]) -> list[PlanStep]:
+    """mloda's resolved plan; nothing is computed."""
+    return mloda.explain(
+        request(names),
         compute_frameworks=["PandasDataFrame"],
         plugin_collector=PluginCollector.enabled_feature_groups(set(DEFINITION_GROUPS)),
     )
-    return svg(steps, source)
+
+
+def plan(names: Sequence[str]) -> str:
+    """The plan picture, drawn before data moves."""
+    return svg(steps(names), source_of(names))
 
 
 def batch() -> Run:
@@ -85,7 +103,8 @@ def batch() -> Run:
 
 
 def ensure_store() -> None:
-    if not STORE.values:
+    """Fill the store unless it already holds this definition at this checkout."""
+    if not STORE.values or STORE.version != NetSpend30d.version() or STORE.as_of != CHECKOUT:
         batch()
 
 
@@ -191,7 +210,7 @@ def checkout(customer: int = CUSTOMER) -> Slide:
         [f"net_spend_30d = {value} {owner_tag('risk')}", f"rule: at least {LIMIT:,.0f}", "read from the store"],
         result.seconds,
     )
-    return Slide(body, "The checkout says no")
+    return Slide(body, "The checkout says yes" if allowed else "The checkout says no")
 
 
 @dataclass
@@ -199,7 +218,7 @@ class Agent:
     """Asks mloda what it needs; each question maps to the calls it makes."""
 
     customer: int = CUSTOMER
-    script: dict[str, Callable[[Agent], Slide]] = field(default_factory=dict)
+    script: dict[str, Callable[[Agent], Slide]] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.script = {
@@ -226,16 +245,17 @@ class Agent:
         name = registry("spend")[0]["name"]  # the first number called spend
         result = run([name])
         value = result.value(name, self.customer)
-        answer = f"Your spend is {money(value)}, above the {LIMIT:,.0f} limit. You should have been accepted."
-        calls = ['registry("spend")[0]', f'mloda.run_all(["{name}"])']
-        return self.say("Why was I declined?", calls, answer + " " + seconds(result.seconds))
+        verdict = "You should have been accepted." if value >= LIMIT else "That is why."
+        side = "above" if value >= LIMIT else "below"
+        answer = f"Your spend is {money(value)}, {side} the {LIMIT:,.0f} limit. {verdict} {seconds(result.seconds)}"
+        calls = [f'mloda.run_all(["{name}"])  # the first number called spend']
+        return self.say("Why was I declined?", calls, answer)
 
     def which_spend(self) -> Slide:
         rows = registry("spend")
         answer = "Two numbers called spend, two owners. The checkout decides with the one risk owns."
-        return self.say(
-            "Which numbers are called spend?", ['registry("spend")'], answer, table(rows), "1 · Find what exists"
-        )
+        calls = ["get_feature_group_docs()  # the registry"]
+        return self.say("Which numbers are called spend?", calls, answer, table(rows), "1 · Find what exists")
 
     def meaning(self) -> Slide:
         source = "\n".join(line for line in inspect.getsource(NetSpend30d).splitlines() if line.strip())
@@ -249,7 +269,7 @@ class Agent:
         result = run(["net_spend_30d"], source=MarketingExport)
         refusal = f'<p class="retail-refusal">{html.escape(result.refusal or "")}</p>'
         answer = f"No. mloda stopped while planning, before any data was read. {seconds(result.seconds)}"
-        calls = ['mloda.run_all(["net_spend_30d"], MarketingExport)']
+        calls = ['mloda.run_all(["net_spend_30d"])  # source: the marketing export']
         return self.say(
             "Can I compute net_spend_30d from the marketing export?", calls, answer, refusal, "3 · Trust it"
         )
@@ -258,20 +278,26 @@ class Agent:
         stored = batch()
         live = run(["pay_later", "net_spend_30d"], customer=self.customer)
         mine = run(["net_spend_30d"])
-        stored_value = money(STORE.values[self.customer])
-        value = money(mine.value("net_spend_30d", self.customer))
-        version = short(STORE.version)
+        from_store = live.value("net_spend_30d", self.customer)
+        computed = mine.value("net_spend_30d", self.customer)
+        stored_version, version = short(STORE.version), short(NetSpend30d.version())
         receipts = (
             '<div class="retail-receipts">'
             + receipt(
-                "Batch: all customers", f"{len(STORE.values):,} rows", ["into the store", version], stored.seconds
+                "Batch: all customers",
+                f"{len(STORE.values):,} rows",
+                ["into the store", stored_version],
+                stored.seconds,
             )
-            + receipt("Checkout: from the store", stored_value, ["net_spend_30d", version], live.seconds)
-            + receipt("Agent: from the definition", value, ["net_spend_30d", version], mine.seconds)
+            + receipt("Checkout: from the store", money(from_store), ["net_spend_30d", stored_version], live.seconds)
+            + receipt("Agent: from the definition", money(computed), ["net_spend_30d", version], mine.seconds)
             + "</div>"
         )
-        answer = f"The checkout used net_spend_30d: {value}. The cancelled order does not count, so it is below 500."
-        calls = ['mloda.run_all(["net_spend_30d"])  # the batch', 'mloda.run_all(["pay_later"])  # the checkout']
+        side = "above" if computed >= LIMIT else "below"
+        answer = (
+            f"The checkout used net_spend_30d: {money(computed)}. Cancellations count, so it is {side} {LIMIT:,.0f}."
+        )
+        calls = ['mloda.run_all(["net_spend_30d"])  # batch, store, definition']
         return self.say(
             "Which number did the checkout use?", calls, answer, receipts, "4 · Use it: offline, online, agent"
         )
@@ -280,12 +306,13 @@ class Agent:
         names = ["line_value__7d_before__last_return", "last_return_value"]
         picture = f'<figure class="retail-plan">{plan(names)}</figure>'
         result = run(names)
-        before = money(result.value(names[0], self.customer))
-        returned = money(result.value(names[1], self.customer))
+        before = result.value(names[0], self.customer)
+        returned = result.value(names[1], self.customer)
+        verdict = "Yes." if returned >= before else "No."
         answer = (
-            f"Yes. {before} in the week before the return, and the return was worth {returned}. "
+            f"{verdict} {money(before)} in the week before the return, and the return was worth {money(returned)}. "
             f"{seconds(result.seconds)}"
         )
-        calls = ["mloda.explain([...])  # the plan, before data moves", "mloda.run_all([...])"]
+        calls = ["mloda.explain([...])  # the plan, before data moves"]
         extra = f'<p class="retail-names">{" · ".join(names)}</p>{picture}'
         return self.say("Was the returned order the big one?", calls, answer, extra, "5 · Ask something new")

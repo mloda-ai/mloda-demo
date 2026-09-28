@@ -2,16 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+import re
+from typing import Any, ClassVar, cast
 
 import pandas as pd
 from mloda.provider import FeatureChainParserMixin, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 
-from mloda_demo.one_process.chain import PandasOnly
+from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.retail.sources import AS_OF, CANCELLED, NEEDS, MarketingExport, OrderSource, ShopLedger
 
 LIMIT = 500.0  # pay later needs this net spend in the last 30 days
+WINDOW = re.compile(r"^(?P<value>[a-z0-9_]+?)__(?P<days>\d+)d_before__(?P<event>[a-z0-9_]+)$")
 
 
 class Kpi(PandasOnly):
@@ -35,10 +37,14 @@ def as_of(features: FeatureSet) -> pd.Timestamp:
     return pd.Timestamp(features.get_options_key(AS_OF))
 
 
-def days_before(data: pd.DataFrame, value: str, end: Any, days: int) -> pd.Series:
-    """The customer's sum of `value` over the `days` before `end`, on every row of that customer."""
+def days_before(data: pd.DataFrame, values: pd.Series, end: Any, days: int) -> pd.Series:
+    """The customer's sum of `values` over the `days` before `end`, on every row of that customer."""
     inside = (data["invoice_date"] >= end - pd.Timedelta(days=days)) & (data["invoice_date"] < end)
-    return data[value].where(inside, 0).groupby(data["customer_id"]).transform("sum")
+    return values.where(inside, 0).groupby(data["customer_id"]).transform("sum")
+
+
+def cancelled(data: pd.DataFrame) -> pd.Series:
+    return data["invoice"].str.startswith(CANCELLED)
 
 
 class LineValue(Kpi, FeatureGroup):
@@ -57,18 +63,19 @@ class LineValue(Kpi, FeatureGroup):
 
 
 class GrossSpend(Kpi, FeatureGroup):
-    """All orders in the 30 days before the checkout."""
+    """All orders in the 30 days before the checkout; cancellations are not counted."""
 
     NAMES = ("gross_spend",)
     OWNER = "marketing"
     SOURCE = MarketingExport
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return self.inputs("line_value", "customer_id", "invoice_date")
+        return self.inputs("line_value", "invoice", "customer_id", "invoice_date")
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["gross_spend"] = days_before(data, "line_value", as_of(features), days=30)
+        orders = data["line_value"].where(~cancelled(data), 0)
+        data["gross_spend"] = days_before(data, orders, as_of(features), days=30)
         return data
 
 
@@ -84,7 +91,7 @@ class NetSpend30d(Kpi, FeatureGroup):
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        data["net_spend_30d"] = days_before(data, "line_value", as_of(features), days=30)
+        data["net_spend_30d"] = days_before(data, data["line_value"], as_of(features), days=30)
         return data
 
 
@@ -116,34 +123,43 @@ class LastReturn(Kpi, FeatureGroup):
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
         customer = data["customer_id"]
-        returns = data["invoice"].str.startswith(CANCELLED) & (data["invoice_date"] < as_of(features))
+        returns = cancelled(data) & (data["invoice_date"] < as_of(features))
         data["last_return"] = data["invoice_date"].where(returns).groupby(customer).transform("max")
-        last = returns & (data["invoice_date"] == data["last_return"])
-        data["last_return_value"] = -data["line_value"].where(last, 0).groupby(customer).transform("sum")
+        latest = returns & (data["invoice_date"] == data["last_return"])
+        last_invoice = data["invoice"].where(latest).groupby(customer).transform("max")
+        value = data["line_value"].where(data["invoice"] == last_invoice, 0).groupby(customer).transform("sum")
+        data["last_return_value"] = -value + 0.0  # + 0.0 turns -0.0 into 0.0
         return data
 
 
 class DaysBefore(Kpi, FeatureChainParserMixin, FeatureGroup):
     """`value__7d_before__event`: the customer's sum of a value in the days before an event's date."""
 
-    PREFIX_PATTERN = r"^[a-z_]+__\d+d_before__[a-z_]+$"
+    PREFIX_PATTERN = WINDOW.pattern
     OWNER = "shared"
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        value, _, event = str(feature_name).split("__")
+        value, _, event = parse(feature_name)
         # The window needs what its parts need, so both parts read the same source.
         return self.inputs(value, event, "customer_id", "invoice_date", needs=needs_of(value) or needs_of(event))
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
         for feature in features.features:
-            value, days, event = str(feature.name).split("__")
-            data[str(feature.name)] = days_before(data, value, data[event], days=int(days.split("d_")[0]))
+            value, days, event = parse(feature.name)
+            data[str(feature.name)] = days_before(data, data[value], data[event], days=days)
         return data
 
 
+def parse(name: FeatureName | str) -> tuple[str, int, str]:
+    match = WINDOW.match(str(name))
+    if match is None:
+        raise ValueError(f"{name} is not value__<n>d_before__event")
+    return match["value"], int(match["days"]), match["event"]
+
+
 DEFINITIONS: tuple[type[Kpi], ...] = (LineValue, GrossSpend, NetSpend30d, PayLater, LastReturn, DaysBefore)
-FEATURE_GROUPS: tuple[type[FeatureGroup], ...] = (LineValue, GrossSpend, NetSpend30d, PayLater, LastReturn, DaysBefore)
+FEATURE_GROUPS = tuple(cast(type[FeatureGroup], kpi) for kpi in DEFINITIONS)
 
 
 def needs_of(name: str) -> str | None:

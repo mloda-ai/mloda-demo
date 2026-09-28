@@ -12,8 +12,8 @@ import pandas as pd
 from mloda.provider import INPUT_DATA_STAGE, BaseInputData, FeatureGroup, FeatureSet, record_match_rejection
 from mloda.user import Options
 
+from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.physical_ai.clip import frame_index, load_depth
-from mloda_demo.physical_ai.definition import PandasOnly
 
 READER_COLUMNS = frozenset({"frame", "t_s", "source", "depth_raw", "depth_scale"})
 REQUIRES_DECLARED_SCALE = "requires_declared_scale"

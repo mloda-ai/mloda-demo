@@ -64,8 +64,7 @@ def detour(edge: tuple[int, int], edges: set[tuple[int, int]]) -> bool:
 def node(step: PlanStep, source: type[OrderSource]) -> Node:
     if step.feature_group is Orders:
         return Node(source.label.removeprefix("the "), source.owner)
-    names = step.requested_feature_names or step.feature_names
-    return Node("\n".join(sorted(names)), str(getattr(step.feature_group, "OWNER", "")))
+    return Node(", ".join(sorted(step.feature_names)), str(getattr(step.feature_group, "OWNER", "")))
 
 
 def depths(count: int, edges: Sequence[tuple[int, int]]) -> list[int]:
@@ -83,14 +82,17 @@ def draw(nodes: Sequence[Node], edges: Sequence[tuple[int, int]]) -> Figure:
     columns = max(depth) + 1
     layers = [[index for index, d in enumerate(depth) if d == column] for column in range(columns)]
     rows = max(len(layer) for layer in layers)
-    width = max(2.8, 0.13 * max(len(line) for n in nodes for line in n.label.splitlines()) + 1.0)
-    figure = Figure(figsize=(width * columns + 0.4, 1.6 * rows + 0.4))
+    # A layer that an arrow jumps over sits lower, so the arrow passes above its boxes.
+    jumped = {column for start, end in edges for column in range(depth[start] + 1, depth[end])}
+    drop = 0.8 if jumped else 0.0
+    width = max(2.8, 0.13 * max(len(n.label) for n in nodes) + 1.0)
+    figure = Figure(figsize=(width * columns + 0.4, 1.6 * (rows + drop) + 0.4))
     axes = figure.add_subplot()
     axes.set_xlim(-0.5, columns - 0.5)
-    axes.set_ylim(-0.5, rows - 0.5)
+    axes.set_ylim(-0.5 - drop, rows - 0.5)
     axes.set_axis_off()
     position = {
-        index: (column, (rows - 1) / 2 + (len(layer) - 1) / 2 - row)
+        index: (column, (rows - 1) / 2 + (len(layer) - 1) / 2 - row - (drop if column in jumped else 0.0))
         for column, layer in enumerate(layers)
         for row, index in enumerate(layer)
     }

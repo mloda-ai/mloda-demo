@@ -10,11 +10,12 @@ from mloda_demo.retail.agent import (
     CHECKOUT,
     CUSTOMER,
     DEFINITION_GROUPS,
-    Agent,
     batch,
     checkout,
+    ensure_store,
     registry,
     run,
+    steps,
 )
 from mloda_demo.retail.kpis import NetSpend30d
 from mloda_demo.retail.picture import graph
@@ -53,6 +54,8 @@ def test_marketing_and_risk_differ_by_exactly_the_cancelled_order(ledger: pd.Dat
     cancelled = window[window["invoice"].str.startswith("C")]["value"].sum()
     assert (gross, net) == (pytest.approx(1591.6), pytest.approx(252.0))
     assert gross - net == pytest.approx(-cancelled) == pytest.approx(1339.6)
+    # Marketing's definition leaves cancellations out itself, whichever source feeds it.
+    assert run(["gross_spend"], source=ShopLedger).value("gross_spend", CUSTOMER) == pytest.approx(gross)
 
 
 def test_net_spend_30d_matches_pandas_for_every_customer(ledger: pd.DataFrame) -> None:
@@ -72,12 +75,18 @@ def test_marketing_export_is_refused_before_any_data_is_read(monkeypatch: pytest
     assert loads == []
 
 
-def test_store_and_definition_give_the_same_number_and_version() -> None:
+def test_store_and_definition_give_the_same_number() -> None:
     batch()
-    assert STORE.version == NetSpend30d.version()
     stored = run(["net_spend_30d"], customer=CUSTOMER).value("net_spend_30d", CUSTOMER)
     computed = run(["net_spend_30d"]).value("net_spend_30d", CUSTOMER)
     assert stored == pytest.approx(computed)
+
+
+def test_a_store_filled_by_another_definition_is_filled_again() -> None:
+    STORE.fill({CUSTOMER: 0.0}, "an older definition", CHECKOUT)
+    ensure_store()
+    assert STORE.version == NetSpend30d.version()
+    assert STORE.values[CUSTOMER] == pytest.approx(252.0)
 
 
 def test_mloda_refuses_to_guess_between_store_and_definition() -> None:
@@ -101,21 +110,7 @@ def test_the_returned_order_was_the_big_one() -> None:
 
 
 def test_the_plan_joins_finance_and_logistics_before_data_moves() -> None:
-    steps = mloda.explain(
-        [
-            Feature(name, Options(group={ShopLedger: str(LEDGER), AS_OF: CHECKOUT}))
-            for name in ["line_value__7d_before__last_return", "last_return_value"]
-        ],
-        compute_frameworks=["PandasDataFrame"],
-        plugin_collector=PluginCollector.enabled_feature_groups(set(DEFINITION_GROUPS)),
-    )
-    nodes, edges = graph(steps, ShopLedger)
+    nodes, edges = graph(steps(["line_value__7d_before__last_return", "last_return_value"]), ShopLedger)
     window = next(index for index, node in enumerate(nodes) if node.owner == "shared")
     assert {nodes[start].owner for start, end in edges if end == window} == {"finance", "logistics"}
-    assert {node.owner for node in nodes} == {"finance", "logistics", "shared"}
-
-
-def test_every_question_has_an_answer() -> None:
-    agent = Agent()
-    for question in agent.script:
-        assert "retail-answer" in agent.ask(question)._mime_()[1]
+    assert sorted(node.owner for node in nodes) == ["finance", "finance", "logistics", "shared"]

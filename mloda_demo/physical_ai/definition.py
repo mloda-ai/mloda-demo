@@ -6,23 +6,17 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from mloda.provider import ComputeFramework, FeatureGroup, FeatureSet
+from mloda.provider import FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
-from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 from numpy.typing import NDArray
 
+from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.physical_ai.clip import CORRIDOR, PERCENTILE, nearest_in_corridor
 
 STOP_THRESHOLD_M = 1.0
 # What the conversion assumes when the reader declares no scale: 16-bit depth in millimetres.
 ASSUMED_SCALE = {"uint16": 1000.0}
 ASSUMED_UNIT = {"uint16": "mm"}
-
-
-class PandasOnly:
-    @classmethod
-    def compute_framework_rule(cls) -> set[type[ComputeFramework]] | None:
-        return {PandasDataFrame}
 
 
 def to_metres(raw: NDArray[Any], scale: float) -> NDArray[np.float64]:
