@@ -10,4 +10,5 @@ Third-party components keep their own licenses: mloda, mloda-registry, mloda-plu
 marimo, OpenTelemetry (Apache 2.0); PyTorch (BSD 3-Clause); Zennit (LGPLv3+); OpenML German
 Credit dataset (see https://www.openml.org/ for terms); TUM RGB-D benchmark frames in
 demo_data/physical_ai/pioneer_slam (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, Sturm et al.,
-IROS 2012).
+IROS 2012); UCI Online Retail II orders in demo_data/retail (CC BY 4.0, D. Chen, 2012,
+https://doi.org/10.24432/C5CG6D).

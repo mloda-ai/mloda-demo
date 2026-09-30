@@ -72,6 +72,18 @@ marimo edit notebooks/one_process.py
 
 Frames in `demo_data/physical_ai/redwood/` are five depth images of the Redwood living-room sequence (a rendered scene) as shipped in Open3D's sample data, http://redwood-data.org/indoor/: S. Choi, Q.-Y. Zhou, V. Koltun, *Robust Reconstruction of Indoor Scenes*, CVPR 2015.
 
+### Retail agent (Feature Store Summit 2026)
+
+Talk: *"Online, Offline, n-Chaos: From Stored Features to Executable Definitions"*. No PyTorch needed.
+
+A simulated shop on real orders. A checkout declines "pay later" on risk's `net_spend_30d`; a support agent walks through why, reading the definition, checking it against marketing's export, comparing a stand-in feature store to the live definition, and drawing a plan before any data moves.
+
+```bash
+marimo run --include-code notebooks/retail.py
+```
+
+Orders in `demo_data/retail/` are from [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), June to August 2010: D. Chen, *Online Retail II*, UCI Machine Learning Repository, 2012, https://doi.org/10.24432/C5CG6D. Rebuild with `scripts/fetch_retail.py`.
+
 ## Structure
 
 ```
@@ -84,8 +96,9 @@ mloda_demo/
 │   └── visualization/            # heatmap renderer
 ├── physical_ai/                  # readers, shared definition, welded copies, runner, trace, plot, style
 ├── one_process/                  # chained robot, ML and semantic definitions; OpenLineage run and picture
-demo_data/                        # customer data + trained artifacts; physical_ai/ robot clip and Redwood frames
-notebooks/                        # marimo notebooks and their CSS for the Physical AI talk
+├── retail/                       # order sources, department KPIs, stand-in store, plan picture, scripted agent
+demo_data/                        # customer data + trained artifacts; physical_ai/ robot clip and Redwood frames; retail/ orders
+notebooks/                        # marimo notebooks and their CSS
 slides/                           # Physical AI talk slides (HTML source, pipeline pictures, PDF)
 tests/                            # unit + integration tests
 ```

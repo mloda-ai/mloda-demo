@@ -10,8 +10,8 @@ from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 from numpy.typing import NDArray
 
+from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.physical_ai.clip import CLIP_DIR, frame_index, load_depth, nearest_in_corridor
-from mloda_demo.physical_ai.definition import PandasOnly
 
 
 def _frames(column: str) -> pd.DataFrame:

@@ -2,15 +2,11 @@
 
 from __future__ import annotations
 
-from mloda.provider import ComputeFramework
 from mloda.user import FeatureName
-from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
+from mloda_demo.pandas_only import PandasOnly
 
-class PandasOnly:
-    @classmethod
-    def compute_framework_rule(cls) -> set[type[ComputeFramework]] | None:
-        return {PandasDataFrame}
+__all__ = ["PandasOnly", "root_of", "source_of"]
 
 
 def source_of(feature_name: FeatureName | str) -> str:
