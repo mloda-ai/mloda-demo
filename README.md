@@ -76,11 +76,21 @@ Frames in `demo_data/physical_ai/redwood/` are five depth images of the Redwood 
 
 Talk: *"Online, Offline, n-Chaos: From Stored Features to Executable Definitions"*. No PyTorch needed.
 
-A simulated shop on real orders. A checkout declines "pay later" on risk's `net_spend_30d`; a support agent walks through why, reading the definition, checking it against marketing's export, comparing a stand-in feature store to the live definition, and drawing a plan before any data moves.
+A simulated shop on real orders, in five slides. The checkout declines paying by invoice on risk's `net_spend_30d`; the talk deck shows that case. Here a support agent takes five steps, each a concept from feature stores with one small change, and each a plain mloda call. The hidden setup cell names the local details once (source, point in time, customer); each request scopes itself with `feature_group=`, so no call needs run-level settings; `show` only formats the result.
+
+| Step | You know | The small change | Call |
+|---|---|---|---|
+| 1 Find what exists | The registry | It is a package | `get_feature_group_docs(search="spend")` |
+| 2 Understand a number | The feature definition | The definition itself runs | `mloda.run_all([Feature("net_spend_30d", one_customer, feature_group="NetSpend30d")])` |
+| 3 Trust it | Schema and validation | A contract | the same call with marketing's export raises `FeatureResolutionError` while planning |
+| 4 Use it | Offline and online | Declarative: each request says what it wants; a stand-in plays the feature store | one call with three requests: training and the agent from `NetSpend30d`, the checkout from `FeatureStore` |
+| 5 Ask something new | On-demand features | Nobody registered this combination; mloda resolves the plan | `mloda.run_all([Feature("line_value__7d_before__last_return", one_customer, feature_group="DaysBefore")])` |
 
 ```bash
-marimo run --include-code notebooks/retail.py
+marimo edit notebooks/retail.py
 ```
+
+Run all cells once (Ctrl+Shift+R; marimo leaves a cell without output off the slides), then switch to the slides (Ctrl+.). Each slide shows its step and the command; the next arrow shows the result, so every step takes two arrows (`?fragments=false` shows both at once); the cell's run button runs it again. To present without the editor: `marimo run notebooks/retail.py --include-code`.
 
 Orders in `demo_data/retail/` are from [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), June to August 2010: D. Chen, *Online Retail II*, UCI Machine Learning Repository, 2012, https://doi.org/10.24432/C5CG6D. Rebuild with `scripts/fetch_retail.py`.
 

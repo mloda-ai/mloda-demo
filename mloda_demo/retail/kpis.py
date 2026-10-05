@@ -7,10 +7,10 @@ from typing import Any, ClassVar, cast
 
 import pandas as pd
 from mloda.provider import FeatureChainParserMixin, FeatureGroup, FeatureSet
-from mloda.user import Feature, FeatureName, Options
+from mloda.user import DataType, Feature, FeatureName, Options
 
 from mloda_demo.pandas_only import PandasOnly
-from mloda_demo.retail.sources import AS_OF, CANCELLED, NEEDS, MarketingExport, OrderSource, ShopLedger
+from mloda_demo.retail.sources import AS_OF, CANCELLED, COLUMNS, NEEDS, MarketingExport, OrderSource, ShopLedger
 
 LIMIT = 500.0  # pay later needs this net spend in the last 30 days
 WINDOW = re.compile(r"^(?P<value>[a-z0-9_]+?)__(?P<days>\d+)d_before__(?P<event>[a-z0-9_]+)$")
@@ -30,7 +30,14 @@ class Kpi(PandasOnly):
     def inputs(cls, *names: str, needs: str | None = None) -> set[Feature]:
         """Input features that carry what this definition needs from the source."""
         needs = needs or cls.NEEDS
-        return {Feature(name, Options(group={} if needs is None else {NEEDS: needs})) for name in names}
+        return {
+            Feature(
+                name,
+                Options(group={} if needs is None else {NEEDS: needs}),
+                feature_group="Orders" if name in COLUMNS else None,  # raw columns come from the shop's orders
+            )
+            for name in names
+        }
 
 
 def as_of(features: FeatureSet) -> pd.Timestamp:
@@ -63,7 +70,7 @@ class LineValue(Kpi, FeatureGroup):
 
 
 class GrossSpend(Kpi, FeatureGroup):
-    """All orders in the 30 days before the checkout; cancellations are not counted."""
+    """Gross spend, 30 days: all orders, cancellations ignored."""
 
     NAMES = ("gross_spend",)
     OWNER = "marketing"
@@ -79,15 +86,44 @@ class GrossSpend(Kpi, FeatureGroup):
         return data
 
 
-class NetSpend30d(Kpi, FeatureGroup):
-    """Orders minus cancellations in the 30 days before the checkout. Decides pay later."""
+class NetSpend(Kpi, FeatureGroup):
+    """Net spend: orders minus cancellations, all time."""
 
-    NAMES = ("net_spend_30d",)
-    OWNER = "risk"
+    NAMES = ("net_spend",)
+    OWNER = "finance"
     NEEDS = "cancellations"
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
         return self.inputs("line_value", "customer_id", "invoice_date")
+
+    @classmethod
+    def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
+        before = data["invoice_date"] < as_of(features)
+        data["net_spend"] = data["line_value"].where(before, 0).groupby(data["customer_id"]).transform("sum")
+        return data
+
+
+class NetSpend30d(Kpi, FeatureGroup):
+    """Net spend, 30 days: orders minus cancellations. The checkout uses it."""
+
+    NAMES = ("net_spend_30d",)
+    OWNER = "risk"
+
+    def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
+        return {
+            Feature("line_value", options={"needs": "cancellations"}),
+            Feature("customer_id", options={"needs": "cancellations"}, feature_group="Orders"),
+            Feature("invoice_date", options={"needs": "cancellations"}, feature_group="Orders"),
+        }
+
+    @classmethod
+    def return_data_type_rule(cls, feature: Feature) -> DataType | None:
+        return DataType.DOUBLE
+
+    @classmethod
+    def validate_output_features(cls, data: Any, features: FeatureSet) -> None:
+        if data["net_spend_30d"].isna().any():
+            raise ValueError("net_spend_30d: a customer has no value")
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
@@ -96,7 +132,7 @@ class NetSpend30d(Kpi, FeatureGroup):
 
 
 class PayLater(Kpi, FeatureGroup):
-    """The checkout's rule: pay later needs a net spend of 500 in the last 30 days."""
+    """The checkout's rule: pay by invoice needs 500 of orders minus cancellations in the last 30 days."""
 
     NAMES = ("pay_later",)
     OWNER = "risk"
@@ -136,7 +172,7 @@ class DaysBefore(Kpi, FeatureChainParserMixin, FeatureGroup):
     """`value__7d_before__event`: the customer's sum of a value in the days before an event's date."""
 
     PREFIX_PATTERN = WINDOW.pattern
-    OWNER = "shared"
+    OWNER = "on request"  # nobody registers a combination; it is resolved when asked for
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
         value, _, event = parse(feature_name)
@@ -158,12 +194,15 @@ def parse(name: FeatureName | str) -> tuple[str, int, str]:
     return match["value"], int(match["days"]), match["event"]
 
 
-DEFINITIONS: tuple[type[Kpi], ...] = (LineValue, GrossSpend, NetSpend30d, PayLater, LastReturn, DaysBefore)
+DEFINITIONS: tuple[type[Kpi], ...] = (LineValue, GrossSpend, NetSpend, NetSpend30d, PayLater, LastReturn, DaysBefore)
 FEATURE_GROUPS = tuple(cast(type[FeatureGroup], kpi) for kpi in DEFINITIONS)
 
 
 def needs_of(name: str) -> str | None:
-    return next((kpi.NEEDS for kpi in DEFINITIONS if name in kpi.NAMES), None)
+    """What a registered number's inputs ask of the source, read from its input_features."""
+    kpi = kpi_of(name)
+    inputs = cast(type[FeatureGroup], kpi)().input_features(Options(), FeatureName(name)) if kpi else None
+    return next((needs for feature in inputs or () if (needs := feature.options.get(NEEDS))), None)
 
 
 def kpi_of(name: str) -> type[Kpi] | None:

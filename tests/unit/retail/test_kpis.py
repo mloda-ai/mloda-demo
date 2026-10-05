@@ -1,6 +1,7 @@
 from collections.abc import Callable
 
 import pandas as pd
+import pytest
 from mloda.provider import FeatureSet
 from mloda.user import Options
 
@@ -8,6 +9,7 @@ from mloda_demo.retail.kpis import (
     DaysBefore,
     GrossSpend,
     LastReturn,
+    NetSpend,
     NetSpend30d,
     PayLater,
     days_before,
@@ -63,6 +65,17 @@ def test_a_cancellation_lowers_net_spend_and_not_gross_spend(feature_set: Featur
     assert net["net_spend_30d"].iloc[0] == 252.0
     assert gross["gross_spend"].iloc[0] == 1591.6
     assert not PayLater.calculate_feature(net, feature_set("pay_later"))["pay_later"].iloc[0]
+
+
+def test_finance_counts_every_order_before_the_checkout(feature_set: FeatureSetFactory) -> None:
+    data = lines(
+        ("0", 7, "2010-06-01", 40.0),  # older than 30 days: in
+        ("1", 7, "2010-08-05", 1339.6),
+        ("C1", 7, "2010-08-06", -1339.6),
+        ("2", 7, "2010-09-02", 99.0),  # after the checkout: out
+    )
+    net = NetSpend.calculate_feature(data, feature_set("net_spend", as_of="2010-08-31 15:37"))
+    assert list(net["net_spend"]) == pytest.approx([40.0] * 4)
 
 
 def test_last_return_ignores_returns_after_the_checkout(feature_set: FeatureSetFactory) -> None:
