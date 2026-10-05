@@ -1,7 +1,49 @@
 {
   "type": "slides",
   "data": {
-    "cells": [],
-    "deck": {}
+    "cells": [
+      {
+        "type": "skip"
+      },
+      {
+        "type": "slide"
+      },
+      {
+        "type": "fragment",
+        "showCode": true
+      },
+      {
+        "type": "slide"
+      },
+      {
+        "type": "fragment",
+        "showCode": true
+      },
+      {
+        "type": "slide"
+      },
+      {
+        "type": "fragment",
+        "showCode": true
+      },
+      {
+        "type": "slide"
+      },
+      {
+        "type": "fragment",
+        "showCode": true
+      },
+      {
+        "type": "slide"
+      },
+      {
+        "type": "fragment",
+        "showCode": true
+      }
+    ],
+    "deck": {
+      "transition": "none",
+      "verticalAlign": "top"
+    }
   }
 }

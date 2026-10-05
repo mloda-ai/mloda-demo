@@ -19,6 +19,7 @@ CANCELLED = "C"  # invoice prefix of a cancellation
 # Group options travel from a requested feature down to the reader.
 AS_OF = "as_of"
 NEEDS = "needs"  # what a definition needs its source to deliver
+CUSTOMER = "customer"  # one customer's order lines only
 
 
 class OrderSource(BaseInputData):
@@ -47,6 +48,9 @@ class OrderSource(BaseInputData):
     @classmethod
     def load_data(cls, data_access: Any, features: FeatureSet) -> Any:
         lines = pd.read_csv(data_access, dtype={"invoice": str}, parse_dates=["invoice_date"])
+        customer = features.get_options_key(CUSTOMER)
+        if customer is not None:
+            lines = lines[lines["customer_id"] == int(customer)]
         return cls.keep(lines).reset_index(drop=True)
 
     @classmethod

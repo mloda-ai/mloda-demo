@@ -1,0 +1,24 @@
+<script>
+  // Two arrows per step: the command first, then what it returns. ?fragments=false shows both at once.
+  (() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("fragments")) {
+      url.searchParams.set("fragments", "true");
+      window.history.replaceState(null, "", url);
+    }
+    if (url.searchParams.get("fragments") === "false") {
+      document.documentElement.classList.add("retail-one-arrow");
+      return;
+    }
+    // marimo makes the whole cell one fragment; move it onto the result so the command stays on screen.
+    const split = () => {
+      for (const step of document.querySelectorAll(".reveal .slides section .fragment")) {
+        const result = step.querySelector(":scope > .contents > .output");
+        if (!result || !step.querySelector(":scope > .marimo-cell")) continue;
+        step.classList.remove("fragment", "visible");
+        result.classList.add("fragment");
+      }
+    };
+    new MutationObserver(split).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>

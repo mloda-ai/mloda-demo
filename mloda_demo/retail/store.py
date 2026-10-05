@@ -9,8 +9,7 @@ import pandas as pd
 from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
 
 from mloda_demo.retail.kpis import Kpi
-
-CUSTOMER = "customer"  # group option: whose row the store returns
+from mloda_demo.retail.sources import CUSTOMER
 
 
 @dataclass
@@ -30,7 +29,7 @@ STORE = Store()
 
 
 class FeatureStore(Kpi, FeatureGroup):
-    """Stand-in feature store: net_spend_30d as the batch stored it."""
+    """Stand-in feature store: what the batch stored, looked up by customer."""
 
     NAMES = ("net_spend_30d",)
     OWNER = "store"

@@ -1,4 +1,4 @@
-"""The plan as a picture, drawn from `mloda.explain` before any data moves: one box per step, coloured by owner."""
+"""The plan as a picture, drawn from `mloda.explain` before any data moves: one outlined box per step, its owner in grey."""
 
 from __future__ import annotations
 
@@ -6,22 +6,19 @@ import uuid
 from collections.abc import Sequence
 from dataclasses import dataclass
 from io import StringIO
+from itertools import pairwise
 
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.patches import FancyBboxPatch
 from mloda.user import PlanStep
 
-from mloda_demo.physical_ai.style import CARD, GREEN_STRONG, INK, MATPLOTLIB, MUTED
+from mloda_demo.physical_ai.style import INK, MATPLOTLIB, MUTED
 from mloda_demo.retail.sources import Orders, OrderSource
 
-OWNER_COLOURS = {
-    "finance": GREEN_STRONG,
-    "marketing": "#B45309",
-    "risk": "#1D4ED8",
-    "logistics": "#6D28D9",
-    "store": INK,
-}
+LABEL_SIZE, OWNER_SIZE = 18, 13  # points
+CHARACTER, LINE = 0.14, 0.34  # inches per character and per line of a label
+GAP_X, GAP_Y, EDGE = 0.6, 0.35, 0.1  # inches between columns, between rows, around the picture
 
 
 @dataclass(frozen=True)
@@ -76,23 +73,42 @@ def depths(count: int, edges: Sequence[tuple[int, int]]) -> list[int]:
     return depth
 
 
+def lines_of(label: str) -> list[str]:
+    """One line per name; a chained name breaks at every double underscore, one line per part."""
+    lines: list[str] = []
+    for name in label.split(", "):
+        breaks = [0, *(index for index in range(1, len(name)) if name.startswith("__", index)), len(name)]
+        lines += [name[start:end] for start, end in pairwise(breaks)]
+    return lines
+
+
 @matplotlib.rc_context(MATPLOTLIB)
 def draw(nodes: Sequence[Node], edges: Sequence[tuple[int, int]]) -> Figure:
+    """Boxes in columns by depth, measured in inches so the text keeps its size next to them."""
     depth = depths(len(nodes), edges)
-    columns = max(depth) + 1
-    layers = [[index for index, d in enumerate(depth) if d == column] for column in range(columns)]
+    layers = [[index for index, d in enumerate(depth) if d == column] for column in range(max(depth) + 1)]
     rows = max(len(layer) for layer in layers)
+    labels = [lines_of(node.label) for node in nodes]
+    widths = [
+        max(1.9, CHARACTER * max(len(line) for index in layer for line in labels[index]) + 0.5) for layer in layers
+    ]
+    lefts = [EDGE + sum(widths[:column]) + column * GAP_X for column in range(len(layers))]
+    height = LINE * max(len(lines) for lines in labels) + 0.7
     # A layer that an arrow jumps over sits lower, so the arrow passes above its boxes.
     jumped = {column for start, end in edges for column in range(depth[start] + 1, depth[end])}
-    drop = 0.8 if jumped else 0.0
-    width = max(2.8, 0.13 * max(len(n.label) for n in nodes) + 1.0)
-    figure = Figure(figsize=(width * columns + 0.4, 1.6 * (rows + drop) + 0.4))
-    axes = figure.add_subplot()
-    axes.set_xlim(-0.5, columns - 0.5)
-    axes.set_ylim(-0.5 - drop, rows - 0.5)
+    drop = height / 2 + 0.25 if jumped else 0.0
+    down = height + GAP_Y
+    size = (lefts[-1] + widths[-1] + EDGE, rows * down - GAP_Y + drop + 2 * EDGE)
+    figure = Figure(figsize=size)
+    axes = figure.add_axes((0, 0, 1, 1))
+    axes.set_xlim(0, size[0])
+    axes.set_ylim(0, size[1])
     axes.set_axis_off()
     position = {
-        index: (column, (rows - 1) / 2 + (len(layer) - 1) / 2 - row - (drop if column in jumped else 0.0))
+        index: (
+            lefts[column] + widths[column] / 2,
+            size[1] - EDGE - height / 2 - ((rows - len(layer)) / 2 + row) * down - (drop if column in jumped else 0.0),
+        )
         for column, layer in enumerate(layers)
         for row, index in enumerate(layer)
     }
@@ -100,26 +116,30 @@ def draw(nodes: Sequence[Node], edges: Sequence[tuple[int, int]]) -> Figure:
         (x0, y0), (x1, y1) = position[start], position[end]
         axes.annotate(
             "",
-            xy=(x1 - 0.44, y1),
-            xytext=(x0 + 0.44, y0),
-            arrowprops={"arrowstyle": "->", "color": MUTED, "lw": 1.6, "mutation_scale": 18},
+            xy=(x1 - widths[depth[end]] / 2 - 0.04, y1),
+            xytext=(x0 + widths[depth[start]] / 2 + 0.04, y0),
+            arrowprops={"arrowstyle": "->", "color": MUTED, "lw": 1.8, "mutation_scale": 22},
         )
     for index, (x, y) in position.items():
-        colour = OWNER_COLOURS.get(nodes[index].owner)
+        width = widths[depth[index]]
         axes.add_patch(
             FancyBboxPatch(
-                (x - 0.42, y - 0.32),
-                0.84,
-                0.64,
-                boxstyle="round,pad=0.02,rounding_size=0.08",
-                facecolor=colour or CARD,
-                edgecolor=colour or MUTED,
-                linewidth=1.6,
+                (x - width / 2, y - height / 2),
+                width,
+                height,
+                boxstyle="round,pad=0,rounding_size=0.12",
+                facecolor="white",
+                edgecolor=INK,
+                linewidth=1.2,
             )
         )
-        text = "white" if colour else INK
-        axes.text(x, y + 0.07, nodes[index].label, ha="center", va="center", fontsize=14, color=text)
-        axes.text(x, y - 0.2, nodes[index].owner, ha="center", va="center", fontsize=11, color=text)
+        lines = labels[index]
+        for line_number, line in enumerate(lines):
+            above = (len(lines) - 1) / 2 - line_number
+            axes.text(x, y + 0.17 + above * LINE, line, ha="center", va="center", fontsize=LABEL_SIZE, color=INK)
+        axes.text(
+            x, y - height / 2 + 0.24, nodes[index].owner, ha="center", va="center", fontsize=OWNER_SIZE, color=MUTED
+        )
     return figure
 
 
