@@ -9,9 +9,9 @@ description = "Live demos built on mloda: credit risk with XAI attribution, Phys
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
-    "mloda>=0.13.0,<0.14.0",
-    "mloda-community-otel>=0.4.7",
-    "mloda-community-openlineage>=0.4.7",
+    "mloda>=0.15.1,<0.16.0",
+    "mloda-community-otel>=0.9.0",
+    "mloda-community-openlineage>=0.9.0",
     "opentelemetry-sdk>=1.30,<2",
     "marimo",
     "pandas",
@@ -31,7 +31,7 @@ credit-risk = [
     "openpyxl",
 ]
 dev = [
-    "mloda-testing>=0.4.7",
+    "mloda-testing>=0.9.0",
     "openml",
     "tox",
     "tox-uv",
@@ -39,17 +39,6 @@ dev = [
     "ruff",
     "mypy",
     "bandit",
-]
-
-# Load spans, declared span attributes and step-level OpenLineage inputs are not released yet.
-# 816953a is the last registry commit that still pins mloda 0.13; switch back to PyPI after the next release.
-[tool.uv.sources]
-mloda-community-otel = { git = "https://github.com/mloda-ai/mloda-registry", rev = "816953a7c9a451e2c2ce65d1340cd09d5be59056", subdirectory = "mloda/community/extenders/otel" }
-mloda-community-openlineage = { git = "https://github.com/mloda-ai/mloda-registry", rev = "816953a7c9a451e2c2ce65d1340cd09d5be59056", subdirectory = "mloda/community/extenders/openlineage" }
-
-[tool.uv]
-override-dependencies = [
-    "mloda-community-extenders-shared @ git+https://github.com/mloda-ai/mloda-registry@816953a7c9a451e2c2ce65d1340cd09d5be59056#subdirectory=mloda/community/extenders/shared",
 ]
 
 [tool.setuptools.packages.find]
