@@ -10,7 +10,7 @@ from mloda_demo.physical_ai.runner import Run, at_frame, closest_frame, raw_near
 from mloda_demo.physical_ai.trace import load_span
 
 CHAIR_FRAME = 53
-REJECTION = "DepthToMetres needs a declared scale; DepthPng delivers uint16 without one"
+REJECTION = "DepthToMetres requires declared 'scale'; DepthPng declares no such key"
 
 
 def _chair(result: Run) -> tuple[int, float, bool]:

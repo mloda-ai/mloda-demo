@@ -9,14 +9,13 @@ from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
-from mloda.provider import INPUT_DATA_STAGE, BaseInputData, FeatureGroup, FeatureSet, record_match_rejection
+from mloda.provider import BaseInputData, FeatureGroup, FeatureSet
 from mloda.user import Options
 
 from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.physical_ai.clip import frame_index, load_depth
 
 READER_COLUMNS = frozenset({"frame", "t_s", "source", "depth_raw", "depth_scale"})
-REQUIRES_DECLARED_SCALE = "requires_declared_scale"
 
 
 class DepthFrameReader(BaseInputData):
@@ -33,14 +32,6 @@ class DepthFrameReader(BaseInputData):
         if not isinstance(data_access, (str, Path)) or not (Path(data_access) / "frames.csv").is_file():
             return None
         if not READER_COLUMNS.issuperset(feature_names):
-            return None
-        consumer = options.get(REQUIRES_DECLARED_SCALE)
-        if consumer is not None and cls.scale is None:
-            record_match_rejection(
-                cls.get_class_name(),
-                f"{consumer} needs a declared scale; {cls.get_class_name()} delivers {cls.encoding} without one",
-                stage=INPUT_DATA_STAGE,
-            )
             return None
         return data_access
 
@@ -64,14 +55,10 @@ class DepthFrameReader(BaseInputData):
 
     @classmethod
     def declared_attributes(cls, features: FeatureSet | None) -> dict[str, str]:
+        """No scale key when the scale is unknown, so a consumer requiring one refuses this reader."""
         version = hashlib.sha256(inspect.getsource(cls).encode()).hexdigest()[:4]
-        return {
-            "scale": "undeclared" if cls.scale is None else f"{cls.scale:g} per m",
-            "encoding": cls.encoding,
-            "sensor": cls.sensor,
-            "dataset": cls.dataset,
-            "version": version,
-        }
+        scale = {} if cls.scale is None else {"scale": f"{cls.scale:g} per m"}
+        return {**scale, "encoding": cls.encoding, "sensor": cls.sensor, "dataset": cls.dataset, "version": version}
 
 
 class DepthPng(DepthFrameReader):

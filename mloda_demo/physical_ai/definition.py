@@ -17,6 +17,8 @@ STOP_THRESHOLD_M = 1.0
 # What the conversion assumes when the reader declares no scale: 16-bit depth in millimetres.
 ASSUMED_SCALE = {"uint16": 1000.0}
 ASSUMED_UNIT = {"uint16": "mm"}
+# Group option switching on the check act: DepthToMetres then requires a reader that declares a scale.
+REQUIRES_DECLARED_SCALE = "requires_declared_scale"
 
 
 def to_metres(raw: NDArray[Any], scale: float) -> NDArray[np.float64]:
@@ -35,7 +37,8 @@ class DepthToMetres(PandasOnly, FeatureGroup):
     """Raw depth to metres by the reader's declared scale."""
 
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
-        return {Feature("depth_raw"), Feature("depth_scale")}
+        required = {"scale": None} if options.get(REQUIRES_DECLARED_SCALE) else None
+        return {Feature("depth_raw", required_declarations=required), Feature("depth_scale")}
 
     @classmethod
     def feature_names_supported(cls) -> set[str]:

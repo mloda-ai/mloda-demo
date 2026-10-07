@@ -77,8 +77,9 @@ def trace_lines(result: Run, frame: int | None = None) -> list[TraceLine]:
     load = load_span(result)
     reader = _declared(load)
     encoding = str(reader.get("encoding", row["depth_raw"].dtype))
-    scale = str(reader.get("scale", "?"))
-    undeclared = scale == "undeclared"
+    # A reader without a known scale declares no scale key; no declarations at all stays "?".
+    undeclared = bool(reader) and "scale" not in reader
+    scale = "undeclared" if undeclared else str(reader.get("scale", "?"))
     nearest = float(row["nearest_ahead_m"])
     lines: list[TraceLine] = []
     for span in calculate_spans(result):

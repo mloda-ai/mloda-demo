@@ -15,8 +15,8 @@ from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
 from mloda_demo.physical_ai.clip import CLIP_DIR, nearest_in_corridor
-from mloda_demo.physical_ai.definition import DepthToMetres, NearestAhead, StopRule
-from mloda_demo.physical_ai.readers import REQUIRES_DECLARED_SCALE, DepthFrameReader, DepthFrames
+from mloda_demo.physical_ai.definition import REQUIRES_DECLARED_SCALE, DepthToMetres, NearestAhead, StopRule
+from mloda_demo.physical_ai.readers import DepthFrameReader, DepthFrames
 
 FEATURE_GROUPS: frozenset[type[FeatureGroup]] = frozenset({DepthFrames, DepthToMetres, NearestAhead, StopRule})
 FEATURES = ("frame", "t_s", "source", "depth_raw", "depth_scale", "depth_m", "nearest_ahead_m", "stop")
@@ -51,8 +51,8 @@ def run(
     if reader is not None:
         group[reader] = str(CLIP_DIR)
     if check:
-        # The conversion's requirement travels with the request, so an undeclared reader is refused at plan time.
-        group[REQUIRES_DECLARED_SCALE] = DepthToMetres.get_class_name()
+        # The conversion then requires a declared scale, so an undeclared reader is refused at plan time.
+        group[REQUIRES_DECLARED_SCALE] = True
     name = label or (reader.label if reader is not None else "welded")
     try:
         frames = mloda.run_all(
