@@ -41,12 +41,18 @@ def _step_name(span: ReadableSpan) -> str:
     return str(_attributes(span).get("mloda.feature_group.name", "?")).rsplit(".", 1)[-1]
 
 
+def _operation(span: ReadableSpan) -> str | None:
+    # Span names carry the feature group ("calculate StopRule"); the operation attribute is the stable key.
+    operation = _attributes(span).get("mloda.operation.name")
+    return str(operation) if operation is not None else None
+
+
 def calculate_spans(result: Run) -> list[ReadableSpan]:
-    return sorted((s for s in result.spans if s.name == "mloda.calculate"), key=lambda s: s.start_time or 0)
+    return sorted((s for s in result.spans if _operation(s) == "calculate"), key=lambda s: s.start_time or 0)
 
 
 def load_span(result: Run) -> ReadableSpan | None:
-    return next((s for s in result.spans if s.name == "mloda.load"), None)
+    return next((s for s in result.spans if _operation(s) == "load"), None)
 
 
 def chain(result: Run) -> list[str]:

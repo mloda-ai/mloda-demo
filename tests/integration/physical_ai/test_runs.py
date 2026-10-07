@@ -7,6 +7,7 @@ import pytest
 from mloda_demo.physical_ai import welded
 from mloda_demo.physical_ai.readers import DepthPng, TumDepth
 from mloda_demo.physical_ai.runner import Run, at_frame, closest_frame, raw_nearest, run
+from mloda_demo.physical_ai.trace import load_span
 
 CHAIR_FRAME = 53
 REJECTION = "DepthToMetres needs a declared scale; DepthPng delivers uint16 without one"
@@ -42,7 +43,7 @@ def test_check_refuses_the_undeclared_reader_before_any_number() -> None:
     assert result.error == REJECTION
     assert result.table.empty
     assert not result.passed
-    assert not [span for span in result.spans if span.name == "mloda.load"]
+    assert load_span(result) is None
 
 
 def test_closest_frame_falls_back_to_the_last_frame_without_a_valid_reading() -> None:
