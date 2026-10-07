@@ -29,7 +29,7 @@ def test_every_beat_runs_with_the_generic_reader() -> None:
     row = defs["at_frame"](defs["result"], defs["chair"])
     assert float(row["nearest_ahead_m"]) == pytest.approx(2.915, abs=0.005)
     assert not bool(row["stop"])
-    assert defs["checked"].error == "DepthToMetres needs a declared scale; DepthPng delivers uint16 without one"
+    assert defs["checked"].error == "DepthToMetres requires declared 'scale'; DepthPng declares no such key"
 
 
 def test_the_tum_reader_stops_for_the_chair() -> None:

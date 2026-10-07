@@ -4,10 +4,17 @@ import numpy as np
 import pandas as pd
 import pytest
 from mloda.provider import FeatureSet
-from mloda.user import Options
+from mloda.user import FeatureName, Options
 
 from mloda_demo.physical_ai.clip import nearest_in_corridor
-from mloda_demo.physical_ai.definition import STOP_THRESHOLD_M, DepthToMetres, NearestAhead, StopRule, to_metres
+from mloda_demo.physical_ai.definition import (
+    REQUIRES_DECLARED_SCALE,
+    STOP_THRESHOLD_M,
+    DepthToMetres,
+    NearestAhead,
+    StopRule,
+    to_metres,
+)
 
 FeatureSetFactory = Callable[..., FeatureSet]
 
@@ -42,6 +49,16 @@ def test_depth_to_metres_converts_every_frame_by_its_scale(feature_set: FeatureS
     data = DepthToMetres.calculate_feature(data, feature_set("depth_m"))
     assert data["depth_m"].iloc[0][0, 0] == pytest.approx(1.0)
     assert data["depth_m"].iloc[1][0, 0] == pytest.approx(0.2)
+
+
+def test_depth_to_metres_requires_a_declared_scale_only_when_asked() -> None:
+    def required(options: Options) -> dict[str, object]:
+        inputs = DepthToMetres().input_features(options, FeatureName("depth_m")) or set()
+        return {str(feature.name): feature.required_declarations for feature in inputs}
+
+    assert required(Options()) == {"depth_raw": None, "depth_scale": None}
+    checked = required(Options(group={REQUIRES_DECLARED_SCALE: True}))
+    assert checked == {"depth_raw": {"scale": None}, "depth_scale": None}
 
 
 def test_depth_to_metres_declares_what_it_assumes() -> None:

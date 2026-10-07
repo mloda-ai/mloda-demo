@@ -6,7 +6,7 @@ from mloda.provider import FeatureSet
 from mloda.user import Options
 
 from mloda_demo.physical_ai.clip import CLIP_DIR, frame_index, load_rgb
-from mloda_demo.physical_ai.readers import REQUIRES_DECLARED_SCALE, DepthFrameReader, DepthFrames, DepthPng, TumDepth
+from mloda_demo.physical_ai.readers import DepthFrameReader, DepthFrames, DepthPng, TumDepth
 
 FeatureSetFactory = Callable[..., FeatureSet]
 CLIP = str(CLIP_DIR)
@@ -21,12 +21,6 @@ def test_reader_claims_clip_columns_only(tmp_path: Path) -> None:
     assert DepthPng.match_subclass_data_access(str(tmp_path), ["depth_raw"], Options()) is None
     assert DepthPng.match_subclass_data_access(CLIP, ["depth_m"], Options()) is None
     assert DepthPng.match_subclass_data_access(None, ["depth_raw"], Options()) is None
-
-
-def test_undeclared_reader_declines_a_consumer_that_needs_a_scale() -> None:
-    options = Options(group={REQUIRES_DECLARED_SCALE: "DepthToMetres"})
-    assert DepthPng.match_subclass_data_access(CLIP, ["depth_raw"], options) is None
-    assert TumDepth.match_subclass_data_access(CLIP, ["depth_raw"], options) == CLIP
 
 
 def test_load_data_gives_one_row_per_frame_with_the_declared_scale(feature_set: FeatureSetFactory) -> None:
@@ -56,5 +50,5 @@ def test_readers_declare_scale_encoding_and_their_own_version() -> None:
         "encoding": "uint16",
         "dataset": "TUM RGB-D",
     }
-    assert DepthPng.declared_attributes(None)["scale"] == "undeclared"
+    assert "scale" not in DepthPng.declared_attributes(None)
     assert declared["version"] != DepthPng.declared_attributes(None)["version"]
