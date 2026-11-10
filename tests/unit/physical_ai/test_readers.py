@@ -2,30 +2,35 @@ from collections.abc import Callable
 from pathlib import Path
 
 import numpy as np
-from mloda.provider import FeatureSet
+from mloda.provider import FeatureSet, SourceFeatureGroup, SourceMatch
 from mloda.user import Options
 
 from mloda_demo.physical_ai.clip import CLIP_DIR, frame_index, load_rgb
-from mloda_demo.physical_ai.readers import DepthFrameReader, DepthFrames, DepthPng, TumDepth
+from mloda_demo.physical_ai.readers import DepthFrameReader, DepthPng, TumDepth
 
 FeatureSetFactory = Callable[..., FeatureSet]
 CLIP = str(CLIP_DIR)
 
 
-def test_root_feature_group_reads_through_the_reader_family() -> None:
-    assert isinstance(DepthFrames.input_data(), DepthFrameReader)
+def claims(reader: type[DepthFrameReader], name: str, clip: str | None = CLIP) -> bool:
+    return reader.match_feature_group_criteria(name, Options(group={reader.__name__: clip}))
+
+
+def test_readers_are_source_feature_groups() -> None:
+    assert issubclass(DepthPng, SourceFeatureGroup) and issubclass(TumDepth, DepthFrameReader)
 
 
 def test_reader_claims_clip_columns_only(tmp_path: Path) -> None:
-    assert DepthPng.match_subclass_data_access(CLIP, ["depth_raw", "frame"], Options()) == CLIP
-    assert DepthPng.match_subclass_data_access(str(tmp_path), ["depth_raw"], Options()) is None
-    assert DepthPng.match_subclass_data_access(CLIP, ["depth_m"], Options()) is None
-    assert DepthPng.match_subclass_data_access(None, ["depth_raw"], Options()) is None
+    assert claims(DepthPng, "depth_raw") and claims(DepthPng, "frame")
+    assert not claims(DepthPng, "depth_raw", str(tmp_path))
+    assert not claims(DepthPng, "depth_m")
+    assert not claims(DepthPng, "depth_raw", None)
 
 
-def test_load_data_gives_one_row_per_frame_with_the_declared_scale(feature_set: FeatureSetFactory) -> None:
-    generic = DepthPng.load_data(CLIP, feature_set("depth_raw"))
-    tum = TumDepth.load_data(CLIP, feature_set("depth_raw"))
+def test_load_neutral_gives_one_row_per_frame_with_the_declared_scale(feature_set: FeatureSetFactory) -> None:
+    match = SourceMatch(CLIP, CLIP)
+    generic = DepthPng.load_neutral(match, feature_set("depth_raw"))
+    tum = TumDepth.load_neutral(match, feature_set("depth_raw"))
     assert len(generic) == len(tum) == 54
     assert generic["depth_raw"].iloc[0].dtype == np.uint16
     assert generic["depth_raw"].iloc[0].shape == (480, 640)

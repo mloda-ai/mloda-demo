@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureChainParserMixin, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 
 from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
@@ -16,12 +16,12 @@ HISTORY = DEMO_DATA_DIR / "german_credit.csv"
 APPLICANT = DEMO_DATA_DIR / "one_process" / "applicant.json"
 
 
-class History(PandasOnly, FeatureGroup):
+class History(PandasOnly, DataCreatorFeatureGroup):
     """Offline: every past credit in the UCI German credit table."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"history_amount", "history_months"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"history_amount", "history_months"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
@@ -29,12 +29,12 @@ class History(PandasOnly, FeatureGroup):
         return pd.DataFrame({"history_amount": table["credit_amount"], "history_months": table["duration"]})
 
 
-class Applicant(PandasOnly, FeatureGroup):
+class Applicant(PandasOnly, DataCreatorFeatureGroup):
     """Online: one request, as it arrives."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"applicant_amount", "applicant_months"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"applicant_amount", "applicant_months"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

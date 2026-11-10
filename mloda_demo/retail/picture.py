@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from io import StringIO
 from itertools import pairwise
+from typing import cast
 
 import matplotlib
 from matplotlib.figure import Figure
@@ -14,7 +15,7 @@ from matplotlib.patches import FancyBboxPatch
 from mloda.user import PlanStep
 
 from mloda_demo.physical_ai.style import INK, MATPLOTLIB, MUTED
-from mloda_demo.retail.sources import Orders, OrderSource
+from mloda_demo.retail.sources import OrderSource
 
 LABEL_SIZE, OWNER_SIZE = 18, 13  # points
 CHARACTER, LINE = 0.14, 0.34  # inches per character and per line of a label
@@ -27,10 +28,14 @@ class Node:
     owner: str
 
 
-def graph(steps: Sequence[PlanStep], source: type[OrderSource]) -> tuple[list[Node], list[tuple[int, int]]]:
+def is_source(step: PlanStep) -> bool:
+    return isinstance(step.feature_group, type) and issubclass(step.feature_group, OrderSource)
+
+
+def graph(steps: Sequence[PlanStep]) -> tuple[list[Node], list[tuple[int, int]]]:
     """Nodes for the compute steps, and edges from the step producing an input to the step reading it."""
     compute = [step for step in steps if step.step_kind == "compute" and step.feature_group is not None]
-    nodes = [node(step, source) for step in compute]
+    nodes = [node(step) for step in compute]
     edges = {
         (index, target)
         for target, step in enumerate(compute)
@@ -39,7 +44,7 @@ def graph(steps: Sequence[PlanStep], source: type[OrderSource]) -> tuple[list[No
         if producer is not step and name in producer.feature_names
     }
     # The source feeds nearly every step; keep only its arrows that no other path already shows.
-    roots = {index for index, step in enumerate(compute) if step.feature_group is Orders}
+    roots = {index for index, step in enumerate(compute) if is_source(step)}
     return nodes, sorted(edge for edge in edges if edge[0] not in roots or not detour(edge, edges))
 
 
@@ -58,8 +63,9 @@ def detour(edge: tuple[int, int], edges: set[tuple[int, int]]) -> bool:
     return False
 
 
-def node(step: PlanStep, source: type[OrderSource]) -> Node:
-    if step.feature_group is Orders:
+def node(step: PlanStep) -> Node:
+    if is_source(step):
+        source = cast(type[OrderSource], step.feature_group)
         return Node(source.label.removeprefix("the "), source.owner)
     return Node(", ".join(sorted(step.feature_names)), str(getattr(step.feature_group, "OWNER", "")))
 
@@ -143,11 +149,11 @@ def draw(nodes: Sequence[Node], edges: Sequence[tuple[int, int]]) -> Figure:
     return figure
 
 
-def svg(steps: Sequence[PlanStep], source: type[OrderSource]) -> str:
+def svg(steps: Sequence[PlanStep]) -> str:
     buffer = StringIO()
     # A fresh salt keeps element ids unique when several pictures share one page.
     with matplotlib.rc_context({"svg.hashsalt": uuid.uuid4().hex}):
-        draw(*graph(steps, source)).savefig(
+        draw(*graph(steps)).savefig(
             buffer, format="svg", transparent=True, bbox_inches="tight", metadata={"Date": None}
         )
     return buffer.getvalue()

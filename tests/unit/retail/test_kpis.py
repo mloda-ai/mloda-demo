@@ -2,7 +2,7 @@ from collections.abc import Callable
 
 import pandas as pd
 import pytest
-from mloda.provider import FeatureSet
+from mloda.provider import FeatureSet, SourceFeatureGroup, SourceMatch
 from mloda.user import Options
 
 from mloda_demo.retail.kpis import (
@@ -16,7 +16,7 @@ from mloda_demo.retail.kpis import (
     needs_of,
     parse,
 )
-from mloda_demo.retail.sources import LEDGER, NEEDS, MarketingExport, Orders, OrderSource, ShopLedger
+from mloda_demo.retail.sources import LEDGER, NEEDS, ORDER_SOURCE, ORDERS, MarketingExport, OrderSource, ShopLedger
 from mloda_demo.retail.store import STORE, FeatureStore
 
 FeatureSetFactory = Callable[..., FeatureSet]
@@ -114,25 +114,33 @@ def test_the_store_answers_from_what_the_batch_stored(feature_set: FeatureSetFac
     assert list(result["net_spend_30d"]) == [252.0]
 
 
-def test_root_feature_group_reads_through_the_source_family() -> None:
-    assert isinstance(Orders.input_data(), OrderSource)
+def claims(source: type[OrderSource], name: str, path: str = LEDGER_PATH, **group: str) -> bool:
+    return source.match_feature_group_criteria(
+        name, Options(group={ORDER_SOURCE: source.__name__, ORDERS: path, **group})
+    )
+
+
+def test_both_sources_answer_to_the_family_scope() -> None:
+    assert issubclass(OrderSource, SourceFeatureGroup)
+    assert "OrderSource" in ShopLedger.pointer_keys() and "OrderSource" in MarketingExport.pointer_keys()
 
 
 def test_sources_claim_order_columns_only() -> None:
-    assert ShopLedger.match_subclass_data_access(LEDGER_PATH, ["invoice", "price"], Options()) == LEDGER_PATH
-    assert ShopLedger.match_subclass_data_access(LEDGER_PATH, ["line_value"], Options()) is None
-    assert ShopLedger.match_subclass_data_access("missing.csv.gz", ["invoice"], Options()) is None
+    assert claims(ShopLedger, "invoice") and claims(ShopLedger, "price")
+    assert not claims(ShopLedger, "line_value")
+    assert not claims(ShopLedger, "invoice", "missing.csv.gz")
+    assert not claims(MarketingExport, "invoice", order_source="ShopLedger")
 
 
 def test_marketing_export_declines_a_definition_that_needs_cancellations() -> None:
-    options = Options(group={NEEDS: "cancellations"})
-    assert MarketingExport.match_subclass_data_access(LEDGER_PATH, ["invoice"], options) is None
-    assert ShopLedger.match_subclass_data_access(LEDGER_PATH, ["invoice"], options) == LEDGER_PATH
+    assert not claims(MarketingExport, "invoice", needs="cancellations")
+    assert claims(ShopLedger, "invoice", needs="cancellations")
 
 
 def test_marketing_export_leaves_out_cancellations(feature_set: FeatureSetFactory) -> None:
-    ledger = ShopLedger.load_data(LEDGER_PATH, feature_set("invoice"))
-    export = MarketingExport.load_data(LEDGER_PATH, feature_set("invoice"))
+    match = SourceMatch(LEDGER_PATH, LEDGER_PATH)
+    ledger = ShopLedger.load_neutral(match, feature_set("invoice"))
+    export = MarketingExport.load_neutral(match, feature_set("invoice"))
     cancelled = ledger["invoice"].str.startswith("C")
     assert cancelled.any()
     assert len(export) == (~cancelled).sum()

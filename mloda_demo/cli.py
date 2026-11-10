@@ -109,16 +109,8 @@ def _get_input_links() -> set[Link]:
 
 
 def _feature_surface(fg_cls: Any) -> str:
-    """Best-effort enumeration of the feature names a FG can serve.
-
-    `supported_feature_names` is empty for FGs that declare their surface via
-    `input_data()` (DataCreator) or via `match_feature_group_criteria`. Fall
-    back to inspecting `input_data().feature_names` when present.
-    """
+    """The feature names a FG declares; empty for FGs that match dynamically."""
     declared = set(fg_cls.feature_names_supported() or set())
-    input_data = fg_cls.input_data()
-    if input_data is not None and hasattr(input_data, "feature_names"):
-        declared |= set(input_data.feature_names)
     return ", ".join(sorted(str(n) for n in declared)) if declared else "(matched dynamically)"
 
 

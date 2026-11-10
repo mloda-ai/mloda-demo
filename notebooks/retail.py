@@ -26,10 +26,13 @@ def _():
 
     # The local details, named once: which source, which point in time, which customer.
     ledger, checkout_time = str(LEDGER), "2010-08-31 15:37"
-    every_customer = Options(group={"ShopLedger": ledger, "as_of": checkout_time})
-    one_customer = Options(group={"ShopLedger": ledger, "as_of": checkout_time, "customer": 14045})
+    shop, marketing = "ShopLedger", "MarketingExport"
+    every_customer = Options(group={"order_source": shop, "orders": ledger, "as_of": checkout_time})
+    one_customer = Options(group={"order_source": shop, "orders": ledger, "as_of": checkout_time, "customer": 14045})
     at_checkout = Options(group={"as_of": checkout_time, "customer": 14045})
-    from_marketing = Options(group={"MarketingExport": ledger, "as_of": checkout_time, "customer": 14045})
+    from_marketing = Options(
+        group={"order_source": marketing, "orders": ledger, "as_of": checkout_time, "customer": 14045}
+    )
     ensure_store()  # the stand-in store holds what last night's batch computed
     return (
         Feature,

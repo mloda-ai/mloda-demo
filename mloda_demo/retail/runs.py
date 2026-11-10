@@ -16,13 +16,23 @@ from mloda.user import Feature, Options, PlanStep, PluginCollector, RunResult, m
 
 from mloda_demo.retail.kpis import FEATURE_GROUPS, Kpi, NetSpend30d, PayLater, kpi_of, needs_of
 from mloda_demo.retail.picture import svg
-from mloda_demo.retail.sources import AS_OF, CUSTOMER, LEDGER, NEEDS, MarketingExport, Orders, OrderSource, ShopLedger
+from mloda_demo.retail.sources import (
+    AS_OF,
+    CUSTOMER,
+    LEDGER,
+    NEEDS,
+    ORDER_SOURCE,
+    ORDERS,
+    MarketingExport,
+    OrderSource,
+    ShopLedger,
+)
 from mloda_demo.retail.store import STORE, FeatureStore
 
 CHECKOUT = "2010-08-31 15:37"
 CUSTOMER_ID = 14045
 # The definition and the store both serve net_spend_30d; a run enables one of them, never both.
-DEFINITION_GROUPS: frozenset[type[FeatureGroup]] = frozenset({Orders, *FEATURE_GROUPS})
+DEFINITION_GROUPS: frozenset[type[FeatureGroup]] = frozenset({ShopLedger, MarketingExport, *FEATURE_GROUPS})
 STORE_GROUPS: frozenset[type[FeatureGroup]] = frozenset({FeatureStore, PayLater})
 
 
@@ -44,7 +54,7 @@ def source_of(names: Sequence[str], source: type[OrderSource] | None = None) -> 
 
 def request(names: Sequence[str], source: type[OrderSource] | None = None) -> list[Feature | str]:
     """The features at the checkout; one group for all of them, so they share one read of the source."""
-    group: dict[str, Any] = {source_of(names, source).__name__: str(LEDGER), AS_OF: CHECKOUT}
+    group: dict[str, Any] = {ORDER_SOURCE: source_of(names, source).__name__, ORDERS: str(LEDGER), AS_OF: CHECKOUT}
     needs = next((needs for needs in map(needs_of, names) if needs), None)
     if needs is not None:
         group[NEEDS] = needs
@@ -68,15 +78,18 @@ def run(names: Sequence[str], *, source: type[OrderSource] | None = None, custom
     except FeatureResolutionError as error:
         kpi = kpi_of(names[0])
         consumer = f"{names[0]} ({kpi.OWNER})" if kpi else names[0]
-        return Run(pd.DataFrame(), f"{consumer} {reasons(error) or error}")
+        return Run(pd.DataFrame(), f"{consumer} {reasons(error, source_of(names, source)) or error}")
     # Every frame comes from the same order lines in the same order, so they line up.
     if any(not frame.index.equals(frames[0].index) for frame in frames):
         raise ValueError("result frames are not row-aligned")
     return Run(pd.concat(list(frames), axis=1))
 
 
-def reasons(error: FeatureResolutionError) -> str:
-    return "; ".join(elimination.reason for elimination in error.result.eliminations.values())
+def reasons(error: FeatureResolutionError, source: type[OrderSource]) -> str:
+    """The chosen source's reason when it has one; the other sources only note that they were not chosen."""
+    eliminations = error.result.eliminations
+    chosen = [eliminations[source]] if source in eliminations else eliminations.values()
+    return "; ".join(elimination.reason for elimination in chosen)
 
 
 def steps(names: Sequence[str]) -> list[PlanStep]:
@@ -211,8 +224,7 @@ def answer(result: RunResult) -> str:
             f'<p class="retail-label">Partly shared, depends on the use case</p><pre><code>{html.escape(per_use_case)}</code></pre>'
         )
     else:
-        source = MarketingExport if option(step, MarketingExport.__name__) else ShopLedger
-        shown = f'<figure class="retail-plan">{svg(result.plan, source)}</figure>'
+        shown = f'<figure class="retail-plan">{svg(result.plan)}</figure>'
     return f'<p class="retail-value">{html.escape(name)}, {html.escape(value(result))}</p>{shown}'
 
 

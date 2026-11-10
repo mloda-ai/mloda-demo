@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, ComputeFramework, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import ComputeFramework, DataCreatorFeatureGroup, FeatureSet
 from mloda.user import Index
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
@@ -14,7 +14,7 @@ DEMO_DATA_DIR = Path(__file__).resolve().parents[3] / "demo_data"
 COLUMNS = {"customer_id", "credit_amount", "purpose"}
 
 
-class ApplicationsSqliteFG(FeatureGroup):
+class ApplicationsSqliteFG(DataCreatorFeatureGroup):
     """Applicant metadata from SQLite database."""
 
     compute_framework: type[ComputeFramework] = PandasDataFrame
@@ -24,8 +24,8 @@ class ApplicationsSqliteFG(FeatureGroup):
         return [Index(("customer_id",))]
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator(COLUMNS)
+    def feature_names_supported(cls) -> set[str]:
+        return set(COLUMNS)
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

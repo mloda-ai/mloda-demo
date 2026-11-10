@@ -13,7 +13,7 @@ def test_the_slide_lists_the_shared_hooks_by_name_with_the_inputs_and_the_math_i
         "def return_data_type_rule(...)",
         "def validate_output_features(...)",
     ]
-    assert 'Feature("customer_id", options={"needs": "cancellations"}, feature_group="Orders"),' in [
+    assert 'Feature("customer_id", options={"needs": "cancellations"}, feature_group="OrderSource"),' in [
         line.strip() for line in shared
     ]
     assert not any("OWNER" in line for line in shared), "no owner concept in mloda"

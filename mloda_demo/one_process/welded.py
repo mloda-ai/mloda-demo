@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 
 from mloda_demo.one_process.chain import PandasOnly
@@ -13,10 +13,10 @@ from mloda_demo.one_process.robot import redwood_frames, to_metres, tum_frames
 from mloda_demo.physical_ai.clip import nearest_in_corridor
 
 
-class TumFrames(PandasOnly, FeatureGroup):
+class TumFrames(PandasOnly, DataCreatorFeatureGroup):
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"tum_depth"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"tum_depth"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
@@ -66,10 +66,10 @@ class TumStop(PandasOnly, FeatureGroup):
         return data
 
 
-class RedwoodFrames(PandasOnly, FeatureGroup):
+class RedwoodFrames(PandasOnly, DataCreatorFeatureGroup):
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"redwood_depth"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"redwood_depth"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

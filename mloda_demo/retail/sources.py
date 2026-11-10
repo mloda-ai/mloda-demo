@@ -6,8 +6,15 @@ from pathlib import Path
 from typing import Any, ClassVar
 
 import pandas as pd
-from mloda.provider import INPUT_DATA_STAGE, BaseInputData, FeatureGroup, FeatureSet, record_match_rejection
-from mloda.user import Options
+from mloda.provider import (
+    INPUT_DATA_STAGE,
+    ClaimRoute,
+    NamePolicy,
+    SourceFeatureGroup,
+    SourceMatch,
+    record_match_rejection,
+)
+from mloda.user import DataAccessCollection, Options
 
 from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
 from mloda_demo.pandas_only import PandasOnly
@@ -20,34 +27,48 @@ CANCELLED = "C"  # invoice prefix of a cancellation
 AS_OF = "as_of"
 NEEDS = "needs"  # what a definition needs its source to deliver
 CUSTOMER = "customer"  # one customer's order lines only
+# Options naming the source class and its file; a class-name pointer is refused on a request scoped to a definition.
+ORDER_SOURCE = "order_source"
+ORDERS = "orders"
 
 
-class OrderSource(BaseInputData):
+class OrderSource(PandasOnly, SourceFeatureGroup):
     """Order lines from a CSV file; a subclass says what it delivers."""
+
+    CLAIM_ROUTES = (ClaimRoute("file", NamePolicy.DECLARED, True),)
 
     delivers: ClassVar[frozenset[str]] = frozenset()
     owner: ClassVar[str] = ""
     label: ClassVar[str] = ""
 
     @classmethod
-    def match_subclass_data_access(cls, data_access: Any, feature_names: list[str], options: Options) -> Any:
-        if not isinstance(data_access, (str, Path)) or not Path(data_access).is_file():
-            return None
-        if not set(COLUMNS).issuperset(feature_names):
-            return None
-        needs = options.get(NEEDS)
-        if needs is not None and needs not in cls.delivers:
-            record_match_rejection(
-                cls.get_class_name(),
-                f"needs {needs}; {cls.label} delivers {' and '.join(sorted(cls.delivers))} only",
-                stage=INPUT_DATA_STAGE,
-            )
-            return None
-        return data_access
+    def declared_names(cls) -> frozenset[str]:
+        return frozenset(COLUMNS)
 
     @classmethod
-    def load_data(cls, data_access: Any, features: FeatureSet) -> Any:
-        lines = pd.read_csv(data_access, dtype={"invoice": str}, parse_dates=["invoice_date"])
+    def find_sources(
+        cls, route: ClaimRoute, feature_name: str, options: Options, data_access_collection: DataAccessCollection | None
+    ) -> list[SourceMatch]:
+        name, chosen = cls.get_class_name(), options.get(ORDER_SOURCE)
+        path, needs = options.get(ORDERS), options.get(NEEDS)
+        reason = None
+        if chosen != name:
+            # Scoped here but not chosen: say which source was; a plain non-match stays silent.
+            if chosen is not None and cls.is_pointed(feature_name, options, data_access_collection):
+                reason = f"the request reads its orders from {chosen}"
+        elif not isinstance(path, (str, Path)) or not Path(path).is_file():
+            reason = f"no order file at {path}"
+        elif needs is not None and needs not in cls.delivers:
+            reason = f"needs {needs}; {cls.label} delivers {' and '.join(sorted(cls.delivers))} only"
+        else:
+            return [SourceMatch(source=str(path), access=Path(path))]
+        if reason is not None:
+            record_match_rejection(name, reason, stage=INPUT_DATA_STAGE)
+        return []
+
+    @classmethod
+    def load_neutral(cls, match: SourceMatch, features: Any) -> Any:
+        lines = pd.read_csv(match.access, dtype={"invoice": str}, parse_dates=["invoice_date"])
         customer = features.get_options_key(CUSTOMER)
         if customer is not None:
             lines = lines[lines["customer_id"] == int(customer)]
@@ -76,15 +97,3 @@ class MarketingExport(OrderSource):
     @classmethod
     def keep(cls, lines: pd.DataFrame) -> pd.DataFrame:
         return lines[~lines["invoice"].str.startswith(CANCELLED)]
-
-
-class Orders(PandasOnly, FeatureGroup):
-    """The order lines; a group option keyed by the reader class picks the source."""
-
-    @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return OrderSource()
-
-    @classmethod
-    def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        return OrderSource().load(features)

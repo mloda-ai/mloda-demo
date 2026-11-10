@@ -11,7 +11,7 @@ from opentelemetry.sdk.trace import ReadableSpan
 from mloda_demo.physical_ai.definition import ASSUMED_SCALE, ASSUMED_UNIT
 from mloda_demo.physical_ai.runner import Run, at_frame, closest_frame, raw_nearest
 
-ROLES = {"DepthFrames": "reader", "DepthToMetres": "convert", "NearestAhead": "nearest", "StopRule": "stop"}
+ROLES = {"DepthToMetres": "convert", "NearestAhead": "nearest", "StopRule": "stop"}
 DECLARED = "mloda.declared."
 
 
@@ -56,15 +56,8 @@ def load_span(result: Run) -> ReadableSpan | None:
 
 
 def chain(result: Run) -> list[str]:
-    """Feature group names in data-flow order; the root group shows as the reader that loaded for it."""
-    load = load_span(result)
-    reader = str(_attributes(load).get("mloda.data_access.format", "?")) if load is not None else None
-    parent = load.parent.span_id if load is not None and load.parent is not None else None
-    names = []
-    for span in calculate_spans(result):
-        is_root = parent is not None and span.context is not None and span.context.span_id == parent
-        names.append(reader if is_root and reader is not None else _step_name(span))
-    return names
+    """Feature group names in data-flow order; the reader is the root group."""
+    return [_step_name(span) for span in calculate_spans(result)]
 
 
 def trace_lines(result: Run, frame: int | None = None) -> list[TraceLine]:
@@ -84,15 +77,14 @@ def trace_lines(result: Run, frame: int | None = None) -> list[TraceLine]:
     lines: list[TraceLine] = []
     for span in calculate_spans(result):
         step = _step_name(span)
-        role = ROLES.get(step)
+        role = "reader" if load is not None and step == _step_name(load) else ROLES.get(step)
         if role is None or any(line.role == role for line in lines):
             continue
         declared = _declared(span)
         version = _version(span)
         if role == "reader":
-            name = str(_attributes(load).get("mloda.data_access.format", step)) if load is not None else step
             detail = f"raw {raw:g} ({encoding}, scale {scale})"
-            lines.append(TraceLine(role, name, str(reader.get("version", version)), f"src {row['source']}", detail))
+            lines.append(TraceLine(role, step, str(reader.get("version", version)), f"src {row['source']}", detail))
         elif role == "convert":
             if undeclared:
                 unit = str(declared.get(f"assumes.{encoding}", ASSUMED_UNIT.get(encoding, "?")))

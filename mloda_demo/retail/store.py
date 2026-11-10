@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureSet
 
 from mloda_demo.retail.kpis import Kpi
 from mloda_demo.retail.sources import CUSTOMER
@@ -28,15 +28,11 @@ class Store:
 STORE = Store()
 
 
-class FeatureStore(Kpi, FeatureGroup):
+class FeatureStore(Kpi, DataCreatorFeatureGroup):
     """Stand-in feature store: what the batch stored, looked up by customer."""
 
     NAMES = ("net_spend_30d",)
     OWNER = "store"
-
-    @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"net_spend_30d"})
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
