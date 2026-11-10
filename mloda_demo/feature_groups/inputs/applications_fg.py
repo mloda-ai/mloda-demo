@@ -12,7 +12,7 @@ import json
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, ComputeFramework, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import ComputeFramework, DataCreatorFeatureGroup, FeatureSet
 from mloda.user import Index
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
@@ -21,7 +21,7 @@ from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
 COLUMNS = {"customer_id", "credit_amount", "purpose"}
 
 
-class ApplicationsFG(FeatureGroup):
+class ApplicationsFG(DataCreatorFeatureGroup):
     """Structured applicant metadata loaded from applications.json."""
 
     compute_framework: type[ComputeFramework] = PandasDataFrame
@@ -31,8 +31,8 @@ class ApplicationsFG(FeatureGroup):
         return [Index(("customer_id",))]
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator(COLUMNS)
+    def feature_names_supported(cls) -> set[str]:
+        return set(COLUMNS)
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

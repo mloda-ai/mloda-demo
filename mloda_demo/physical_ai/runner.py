@@ -16,9 +16,9 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 
 from mloda_demo.physical_ai.clip import CLIP_DIR, nearest_in_corridor
 from mloda_demo.physical_ai.definition import REQUIRES_DECLARED_SCALE, DepthToMetres, NearestAhead, StopRule
-from mloda_demo.physical_ai.readers import DepthFrameReader, DepthFrames
+from mloda_demo.physical_ai.readers import DepthFrameReader, DepthPng, TumDepth
 
-FEATURE_GROUPS: frozenset[type[FeatureGroup]] = frozenset({DepthFrames, DepthToMetres, NearestAhead, StopRule})
+FEATURE_GROUPS: frozenset[type[FeatureGroup]] = frozenset({DepthPng, TumDepth, DepthToMetres, NearestAhead, StopRule})
 FEATURES = ("frame", "t_s", "source", "depth_raw", "depth_scale", "depth_m", "nearest_ahead_m", "stop")
 
 

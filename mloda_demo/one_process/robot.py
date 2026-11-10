@@ -7,7 +7,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureChainParserMixin, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 from numpy.typing import NDArray
 
@@ -43,36 +43,36 @@ def source_table(name: str, frames: Frames, scale: float) -> pd.DataFrame:
     return pd.DataFrame({name: pd.Series(list(frames), dtype=object), f"{name}_scale": scale})
 
 
-class Tum(PandasOnly, FeatureGroup):
+class Tum(PandasOnly, DataCreatorFeatureGroup):
     """The robot's log: TUM RGB-D benchmark PNGs, 5000 per metre."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"tum", "tum_scale"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"tum", "tum_scale"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
         return source_table("tum", tum_frames(), 5000)
 
 
-class Redwood(PandasOnly, FeatureGroup):
+class Redwood(PandasOnly, DataCreatorFeatureGroup):
     """A simulator's frames: rendered scene, PNGs in millimetres."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"redwood", "redwood_scale"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"redwood", "redwood_scale"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
         return source_table("redwood", redwood_frames(), 1000)
 
 
-class Sim(PandasOnly, FeatureGroup):
+class Sim(PandasOnly, DataCreatorFeatureGroup):
     """A generated wall, delivered as float metres."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"sim", "sim_scale"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"sim", "sim_scale"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

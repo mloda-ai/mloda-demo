@@ -19,7 +19,7 @@ from mloda_demo.retail.runs import (
     steps,
 )
 from mloda_demo.retail.runs import CUSTOMER_ID as CUSTOMER
-from mloda_demo.retail.sources import AS_OF, LEDGER, MarketingExport, OrderSource, ShopLedger
+from mloda_demo.retail.sources import AS_OF, LEDGER, ORDER_SOURCE, ORDERS, MarketingExport, OrderSource, ShopLedger
 from mloda_demo.retail.store import STORE, FeatureStore
 
 
@@ -72,7 +72,7 @@ def test_net_spend_matches_pandas_for_every_customer(ledger: pd.DataFrame, name:
 
 def test_marketing_export_is_refused_before_any_data_is_read(monkeypatch: pytest.MonkeyPatch) -> None:
     loads: list[Any] = []
-    monkeypatch.setattr(OrderSource, "load_data", classmethod(lambda cls, *args: loads.append(cls)))
+    monkeypatch.setattr(OrderSource, "load_neutral", classmethod(lambda cls, *args: loads.append(cls)))
     result = run(["net_spend_30d"], source=MarketingExport)
     assert result.refusal == "net_spend_30d (risk) needs cancellations; the marketing export delivers orders only"
     assert loads == []
@@ -95,14 +95,14 @@ def test_a_store_filled_by_another_definition_is_filled_again() -> None:
 def test_mloda_refuses_to_guess_between_store_and_definition() -> None:
     with pytest.raises(FeatureResolutionError, match="Multiple feature groups"):
         mloda.run_all(
-            [Feature("net_spend_30d", Options(group={ShopLedger: str(LEDGER), AS_OF: CHECKOUT}))],
+            [Feature("net_spend_30d", at_checkout())],
             compute_frameworks=["PandasDataFrame"],
             plugin_collector=PluginCollector.enabled_feature_groups({*DEFINITION_GROUPS, FeatureStore}),
         )
 
 
 def at_checkout(source: str = "ShopLedger", **group: Any) -> Options:
-    return Options(group={source: str(LEDGER), AS_OF: CHECKOUT, **group})
+    return Options(group={ORDER_SOURCE: source, ORDERS: str(LEDGER), AS_OF: CHECKOUT, **group})
 
 
 def plugins(groups: frozenset[Any]) -> dict[str, Any]:
@@ -176,7 +176,7 @@ def test_the_returned_order_was_the_big_one() -> None:
 
 
 def test_the_plan_joins_finance_and_logistics_before_data_moves() -> None:
-    nodes, edges = graph(steps(["line_value__7d_before__last_return"]), ShopLedger)
+    nodes, edges = graph(steps(["line_value__7d_before__last_return"]))
     window = next(index for index, node in enumerate(nodes) if node.owner == "on request")
     assert {nodes[start].owner for start, end in edges if end == window} == {"finance", "logistics"}
     assert sorted(node.owner for node in nodes) == ["finance", "finance", "logistics", "on request"]

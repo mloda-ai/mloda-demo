@@ -9,8 +9,8 @@ from typing import Any, ClassVar
 
 import numpy as np
 import pandas as pd
-from mloda.provider import BaseInputData, FeatureGroup, FeatureSet
-from mloda.user import Options
+from mloda.provider import ClaimRoute, FeatureSet, NamePolicy, SourceFeatureGroup, SourceMatch
+from mloda.user import DataAccessCollection, Options
 
 from mloda_demo.pandas_only import PandasOnly
 from mloda_demo.physical_ai.clip import frame_index, load_depth
@@ -18,8 +18,13 @@ from mloda_demo.physical_ai.clip import frame_index, load_depth
 READER_COLUMNS = frozenset({"frame", "t_s", "source", "depth_raw", "depth_scale"})
 
 
-class DepthFrameReader(BaseInputData):
-    """Reads a clip of 16-bit depth PNGs, one row per frame; a subclass fixes the scale."""
+class DepthFrameReader(PandasOnly, SourceFeatureGroup):
+    """Reads a clip of 16-bit depth PNGs, one row per frame; a subclass fixes the scale.
+
+    A group option keyed by the reader class picks it: `Options(group={TumDepth: clip_dir})`.
+    """
+
+    CLAIM_ROUTES = (ClaimRoute("clip", NamePolicy.DECLARED, False),)
 
     scale: ClassVar[float | None] = None  # units per metre
     encoding: ClassVar[str] = "uint16"
@@ -28,16 +33,21 @@ class DepthFrameReader(BaseInputData):
     label: ClassVar[str] = ""
 
     @classmethod
-    def match_subclass_data_access(cls, data_access: Any, feature_names: list[str], options: Options) -> Any:
-        if not isinstance(data_access, (str, Path)) or not (Path(data_access) / "frames.csv").is_file():
-            return None
-        if not READER_COLUMNS.issuperset(feature_names):
-            return None
-        return data_access
+    def declared_names(cls) -> frozenset[str]:
+        return READER_COLUMNS
 
     @classmethod
-    def load_data(cls, data_access: Any, features: FeatureSet) -> Any:
-        directory = Path(data_access).resolve()
+    def find_sources(
+        cls, route: ClaimRoute, feature_name: str, options: Options, data_access_collection: DataAccessCollection | None
+    ) -> list[SourceMatch]:
+        clip = next((options.get(key) for key in cls.pointer_keys() if key in options), None)
+        if not isinstance(clip, (str, Path)) or not (Path(clip) / "frames.csv").is_file():
+            return []
+        return [SourceMatch(source=str(clip), access=Path(clip))]
+
+    @classmethod
+    def load_neutral(cls, match: SourceMatch, features: Any) -> Any:
+        directory = Path(match.access).resolve()
         index = frame_index(directory)
         paths = [(directory / path).resolve() for path in index["depth"]]
         if any(directory not in path.parents for path in paths):
@@ -76,15 +86,3 @@ class TumDepth(DepthFrameReader):
     sensor = "Kinect on a Pioneer robot"
     dataset = "TUM RGB-D"
     label = "TUM"
-
-
-class DepthFrames(PandasOnly, FeatureGroup):
-    """The clip's frames; a group option keyed by the reader class picks the reader."""
-
-    @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DepthFrameReader()
-
-    @classmethod
-    def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        return DepthFrameReader().load(features)

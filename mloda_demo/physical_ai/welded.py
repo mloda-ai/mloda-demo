@@ -6,7 +6,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 from numpy.typing import NDArray
 
@@ -26,10 +26,10 @@ def _metres(raw: NDArray[Any], scale: float) -> NDArray[np.float64]:
     return metres
 
 
-class KinectDepthPng(PandasOnly, FeatureGroup):
+class KinectDepthPng(PandasOnly, DataCreatorFeatureGroup):
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"frame", "kinect_depth_raw"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"frame", "kinect_depth_raw"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
@@ -79,10 +79,10 @@ class KinectStop(PandasOnly, FeatureGroup):
         return data
 
 
-class TumDepthPng(PandasOnly, FeatureGroup):
+class TumDepthPng(PandasOnly, DataCreatorFeatureGroup):
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"frame", "tum_depth_raw"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"frame", "tum_depth_raw"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

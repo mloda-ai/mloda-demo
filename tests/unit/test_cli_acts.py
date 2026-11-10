@@ -47,11 +47,11 @@ def test_act1_discover_lists_demo_fgs() -> None:
     assert expected.issubset(names)
 
 
-def test_act1_input_fgs_expose_their_columns_via_input_data() -> None:
-    """Discover surface for the input FGs comes from DataCreator(COLUMNS)."""
-    apps_cols = set(ApplicationsFG.input_data().feature_names)  # type: ignore[union-attr]
-    fin_cols = set(FinancialsFG.input_data().feature_names)  # type: ignore[union-attr]
-    qa_cols = set(QuestionnaireFG.input_data().feature_names)  # type: ignore[union-attr]
+def test_act1_input_fgs_expose_their_columns() -> None:
+    """Discover surface for the input FGs comes from feature_names_supported()."""
+    apps_cols = ApplicationsFG.feature_names_supported()
+    fin_cols = FinancialsFG.feature_names_supported()
+    qa_cols = QuestionnaireFG.feature_names_supported()
     assert {"customer_id", "credit_amount", "purpose"} <= apps_cols
     assert {"duration", "age"} <= fin_cols
     assert {"checking_status", "employment"} <= qa_cols

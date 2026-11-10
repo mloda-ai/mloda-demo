@@ -34,7 +34,7 @@ class Kpi(PandasOnly):
             Feature(
                 name,
                 Options(group={} if needs is None else {NEEDS: needs}),
-                feature_group="Orders" if name in COLUMNS else None,  # raw columns come from the shop's orders
+                feature_group="OrderSource" if name in COLUMNS else None,  # raw columns come from the shop's orders
             )
             for name in names
         }
@@ -112,8 +112,8 @@ class NetSpend30d(Kpi, FeatureGroup):
     def input_features(self, options: Options, feature_name: FeatureName) -> set[Feature] | None:
         return {
             Feature("line_value", options={"needs": "cancellations"}),
-            Feature("customer_id", options={"needs": "cancellations"}, feature_group="Orders"),
-            Feature("invoice_date", options={"needs": "cancellations"}, feature_group="Orders"),
+            Feature("customer_id", options={"needs": "cancellations"}, feature_group="OrderSource"),
+            Feature("invoice_date", options={"needs": "cancellations"}, feature_group="OrderSource"),
         }
 
     @classmethod

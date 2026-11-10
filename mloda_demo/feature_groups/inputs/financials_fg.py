@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, ComputeFramework, DataCreator, FeatureGroup, FeatureSet
+from mloda.provider import ComputeFramework, DataCreatorFeatureGroup, FeatureSet
 from mloda.user import Index
 from mloda_plugins.compute_framework.base_implementations.pandas.dataframe import PandasDataFrame
 
@@ -27,7 +27,7 @@ COLUMNS = {
 }
 
 
-class FinancialsFG(FeatureGroup):
+class FinancialsFG(DataCreatorFeatureGroup):
     """Numeric financial fields extracted from per-customer Excel overviews."""
 
     compute_framework: type[ComputeFramework] = PandasDataFrame
@@ -37,8 +37,8 @@ class FinancialsFG(FeatureGroup):
         return [Index(("customer_id",))]
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator(COLUMNS)
+    def feature_names_supported(cls) -> set[str]:
+        return set(COLUMNS)
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:

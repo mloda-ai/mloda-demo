@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import pandas as pd
-from mloda.provider import BaseInputData, DataCreator, FeatureChainParserMixin, FeatureGroup, FeatureSet
+from mloda.provider import DataCreatorFeatureGroup, FeatureChainParserMixin, FeatureGroup, FeatureSet
 from mloda.user import Feature, FeatureName, Options
 
 from mloda_demo.feature_groups.inputs.paths import DEMO_DATA_DIR
@@ -15,12 +15,12 @@ FINANCE = DEMO_DATA_DIR / "one_process" / "finance.csv"
 SALES = DEMO_DATA_DIR / "one_process" / "sales.csv"
 
 
-class Finance(PandasOnly, FeatureGroup):
+class Finance(PandasOnly, DataCreatorFeatureGroup):
     """Finance's invoices: the amount billed and what was refunded."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"finance_customer", "finance_gross", "finance_deductions"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"finance_customer", "finance_gross", "finance_deductions"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
@@ -34,12 +34,12 @@ class Finance(PandasOnly, FeatureGroup):
         )
 
 
-class Sales(PandasOnly, FeatureGroup):
+class Sales(PandasOnly, DataCreatorFeatureGroup):
     """Sales' deals: what was booked and the discount given."""
 
     @classmethod
-    def input_data(cls) -> BaseInputData | None:
-        return DataCreator({"sales_customer", "sales_gross", "sales_deductions"})
+    def feature_names_supported(cls) -> set[str]:
+        return {"sales_customer", "sales_gross", "sales_deductions"}
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
