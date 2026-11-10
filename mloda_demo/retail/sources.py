@@ -27,7 +27,7 @@ CANCELLED = "C"  # invoice prefix of a cancellation
 AS_OF = "as_of"
 NEEDS = "needs"  # what a definition needs its source to deliver
 CUSTOMER = "customer"  # one customer's order lines only
-# Options naming the source class and its file (a class-keyed pointer cannot ride on a feature_group= request).
+# Options naming the source class and its file; a class-name pointer is refused on a request scoped to a definition.
 ORDER_SOURCE = "order_source"
 ORDERS = "orders"
 
@@ -49,19 +49,22 @@ class OrderSource(PandasOnly, SourceFeatureGroup):
     def find_sources(
         cls, route: ClaimRoute, feature_name: str, options: Options, data_access_collection: DataAccessCollection | None
     ) -> list[SourceMatch]:
-        path = options.get(ORDERS)
-        chosen = options.get(ORDER_SOURCE) == cls.get_class_name()
-        if not chosen or not isinstance(path, (str, Path)) or not Path(path).is_file():
-            return []
-        needs = options.get(NEEDS)
-        if needs is not None and needs not in cls.delivers:
-            record_match_rejection(
-                cls.get_class_name(),
-                f"needs {needs}; {cls.label} delivers {' and '.join(sorted(cls.delivers))} only",
-                stage=INPUT_DATA_STAGE,
-            )
-            return []
-        return [SourceMatch(source=str(path), access=Path(path))]
+        name, chosen = cls.get_class_name(), options.get(ORDER_SOURCE)
+        path, needs = options.get(ORDERS), options.get(NEEDS)
+        reason = None
+        if chosen != name:
+            # Scoped here but not chosen: say which source was; a plain non-match stays silent.
+            if chosen is not None and cls.is_pointed(feature_name, options, data_access_collection):
+                reason = f"the request reads its orders from {chosen}"
+        elif not isinstance(path, (str, Path)) or not Path(path).is_file():
+            reason = f"no order file at {path}"
+        elif needs is not None and needs not in cls.delivers:
+            reason = f"needs {needs}; {cls.label} delivers {' and '.join(sorted(cls.delivers))} only"
+        else:
+            return [SourceMatch(source=str(path), access=Path(path))]
+        if reason is not None:
+            record_match_rejection(name, reason, stage=INPUT_DATA_STAGE)
+        return []
 
     @classmethod
     def load_neutral(cls, match: SourceMatch, features: Any) -> Any:

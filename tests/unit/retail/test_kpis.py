@@ -129,6 +129,7 @@ def test_sources_claim_order_columns_only() -> None:
     assert claims(ShopLedger, "invoice") and claims(ShopLedger, "price")
     assert not claims(ShopLedger, "line_value")
     assert not claims(ShopLedger, "invoice", "missing.csv.gz")
+    assert not claims(MarketingExport, "invoice", order_source="ShopLedger")
 
 
 def test_marketing_export_declines_a_definition_that_needs_cancellations() -> None:
