@@ -5,13 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mloda-demo"
 version = "0.1.0"
-description = "Live demos built on mloda: credit risk with XAI attribution, Physical AI sensor features with OpenTelemetry traces and OpenLineage pictures, and a retail agent for the Feature Store Summit."
+description = "Live demos built on mloda: credit risk with XAI attribution, Physical AI sensor features with OpenTelemetry traces and OpenLineage pictures, a retail agent for the Feature Store Summit, and runtime lineage on German ledger exports."
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
     "mloda>=0.19.1,<0.20.0",
     "mloda-community-otel>=0.12.0",
     "mloda-community-openlineage>=0.12.0",
+    "mloda-community-german-ledger>=0.12.0,<0.13.0",
     "opentelemetry-sdk>=1.30,<2",
     "marimo",
     "pandas",
@@ -29,6 +30,9 @@ credit-risk = [
     "torch",
     "zennit",
     "openpyxl",
+]
+stack = [
+    "opentelemetry-exporter-otlp-proto-http>=1.30,<2",
 ]
 dev = [
     "mloda-testing>=0.12.0",
