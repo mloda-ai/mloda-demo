@@ -11,4 +11,6 @@ marimo, OpenTelemetry (Apache 2.0); PyTorch (BSD 3-Clause); Zennit (LGPLv3+); Op
 Credit dataset (see https://www.openml.org/ for terms); TUM RGB-D benchmark frames in
 demo_data/physical_ai/pioneer_slam (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, Sturm et al.,
 IROS 2012); UCI Online Retail II orders in demo_data/retail (CC BY 4.0, D. Chen, 2012,
-https://doi.org/10.24432/C5CG6D).
+https://doi.org/10.24432/C5CG6D); ledger exports in demo_data/runtime_lineage (test books of mloda-registry's
+german_ledger package, Apache 2.0; DATEV header and column line from ledermann/datev, MIT, license text in
+demo_data/runtime_lineage/SOURCE.md).

@@ -94,6 +94,44 @@ Run all cells once (Ctrl+Shift+R; marimo leaves a cell without output off the sl
 
 Orders in `demo_data/retail/` are from [UCI Online Retail II](https://archive.ics.uci.edu/dataset/502/online+retail+ii) ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)), June to August 2010: D. Chen, *Online Retail II*, UCI Machine Learning Repository, 2012, https://doi.org/10.24432/C5CG6D. Rebuild with `scripts/fetch_retail.py`.
 
+### Runtime lineage (OSMC 2026)
+
+Talk: *"Runtime Lineage: End-to-End OpenTelemetry Tracing for AI Data Systems"*. No PyTorch needed.
+
+A tax office's assistant answers from clients' ledger exports. Every answer is one plain mloda call; the OpenTelemetry and OpenLineage extenders give it a trace and a lineage run that point at each other. Built on [`mloda-community-german-ledger`](https://pypi.org/project/mloda-community-german-ledger/) (experimental), which totals DATEV and GDPdU exports and cites the ledger rows behind each total.
+
+| Step | You know | The small change | What happens |
+|---|---|---|---|
+| The case | | | Client B's receivables: a plausible number on a green run |
+| 1 One answer, one ID | A trace | Every span is a data step with a lineage twin | Client A's revenue from a DATEV batch, with its cited rows |
+| 2 Another request, another path | Lineage as a fixed map | It belongs to the request | The same question on client C's GDPdU export: another reader, the same total |
+| 3 The wrong number | Red spans | A green span carries evidence | Client B's batch states no chart and the office reads SKR04, so the bank account counts as receivables |
+| 4 Make it fail loudly | Alerts on failures | Wrong data became a failure | The corrected export states SKR03 and the run refuses; set up with that chart, the office gets the right total |
+
+```bash
+marimo edit notebooks/runtime_lineage.py
+```
+
+Run all cells, then switch to the slides, as for the retail notebook. `show` only formats: the number with its cited rows, one line per step read from the run's spans, and the lineage chain read from its OpenLineage events.
+
+The books in `demo_data/runtime_lineage/` are invented, in real formats (see `SOURCE.md` there).
+
+#### Local stack
+
+`stack/runtime_lineage/` holds a compose file for an OpenTelemetry Collector, Tempo, Prometheus, Grafana and Marquez, bound to 127.0.0.1 (taken from mloda-registry's OpenTelemetry demo). Tests check the configs; the stack itself has not been started with docker yet.
+
+```bash
+docker compose -f stack/runtime_lineage/compose.yaml up -d
+uv sync --all-extras
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318 OPENLINEAGE_URL=http://localhost:5002 marimo edit notebooks/runtime_lineage.py
+```
+
+With the two variables set, the same runs also go to the stack; without them nothing leaves the process. A stack that is down does not stop a run: the notebook keeps its own record, and a lineage server that fails once is left alone until the notebook restarts.
+
+- Traces: Grafana (http://localhost:3000), Explore, Tempo, service `tax-office-assistant`, for example `{ span.mloda.data_access.format = "DatevExtfReader" }`.
+- Metrics: the `mloda steps` dashboard (step duration, failed step share).
+- Lineage: the Marquez UI (http://localhost:3001).
+
 ## Structure
 
 ```
@@ -107,9 +145,11 @@ mloda_demo/
 ├── physical_ai/                  # readers, shared definition, welded copies, runner, trace, plot, style
 ├── one_process/                  # chained robot, ML and semantic definitions; OpenLineage run and picture
 ├── retail/                       # order sources, department KPIs, stand-in store, plan picture, scripted agent
-demo_data/                        # customer data + trained artifacts; physical_ai/ robot clip and Redwood frames; retail/ orders
+├── runtime_lineage/              # the office's books, rule and chart; spans and lineage events in memory or to the stack; show
+demo_data/                        # customer data + trained artifacts; physical_ai/ robot clip and Redwood frames; retail/ orders; runtime_lineage/ ledger exports
 notebooks/                        # marimo notebooks and their CSS
 slides/                           # Physical AI talk slides (HTML source, pipeline pictures, PDF)
+stack/                            # runtime lineage: compose stack for Collector, Tempo, Prometheus, Grafana, Marquez
 tests/                            # unit + integration tests
 ```
 
