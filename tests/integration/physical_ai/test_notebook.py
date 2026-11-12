@@ -1,30 +1,19 @@
-import importlib.util
 import re
-import subprocess  # nosec B404
-import sys
 from pathlib import Path
-from types import ModuleType
 
 import pytest
 
 from mloda_demo.physical_ai import style
 from mloda_demo.physical_ai.readers import TumDepth
+from tests.integration.conftest import assert_notebook_never_imports_torch, load_notebook
 
 NOTEBOOK = Path(__file__).resolve().parents[3] / "notebooks" / "physical_ai.py"
 CSS = NOTEBOOK.with_suffix(".css")
 SLIDES = NOTEBOOK.parents[1] / "slides" / "physical_ai.html"
 
 
-def _notebook() -> ModuleType:
-    spec = importlib.util.spec_from_file_location("physical_ai_notebook", NOTEBOOK)
-    assert spec is not None and spec.loader is not None
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
 def test_every_beat_runs_with_the_generic_reader() -> None:
-    _, defs = _notebook().app.run()
+    _, defs = load_notebook(NOTEBOOK).app.run()
     assert defs["chair"] == 53
     row = defs["at_frame"](defs["result"], defs["chair"])
     assert float(row["nearest_ahead_m"]) == pytest.approx(2.915, abs=0.005)
@@ -33,21 +22,14 @@ def test_every_beat_runs_with_the_generic_reader() -> None:
 
 
 def test_the_tum_reader_stops_for_the_chair() -> None:
-    _, defs = _notebook().app.run(defs={"reader": TumDepth})
+    _, defs = load_notebook(NOTEBOOK).app.run(defs={"reader": TumDepth})
     row = defs["at_frame"](defs["result"], defs["chair"])
     assert float(row["nearest_ahead_m"]) == pytest.approx(0.583, abs=0.005)
     assert bool(row["stop"])
 
 
 def test_physical_ai_code_never_imports_torch() -> None:
-    script = (
-        "import runpy, sys\n"
-        f"runpy.run_path({str(NOTEBOOK)!r}, run_name='__main__')\n"
-        "assert 'mloda_demo.physical_ai.trace' in sys.modules\n"
-        "assert 'torch' not in sys.modules, 'torch was imported'\n"
-    )
-    result = subprocess.run([sys.executable, "-c", script], capture_output=True, text=True, check=False)  # nosec B603
-    assert result.returncode == 0, result.stderr[-2000:]
+    assert_notebook_never_imports_torch(NOTEBOOK, "mloda_demo.physical_ai.trace")
 
 
 def _contrast(foreground: str, background: str) -> float:
