@@ -14,6 +14,7 @@ any agent on top. Same inputs, same outputs, every time.
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import sqlite3
 import sys
@@ -148,17 +149,13 @@ def cmd_run(args: argparse.Namespace) -> int:
             print("Error: applications.db not found. Run `mloda-demo migrate` first.", file=sys.stderr)
             return 1
 
-    # customer_id is claimed by all three input FGs (index column). Request it
-    # separately so mloda doesn't fail on multiple matches, and use it as the
-    # join key across feature groups.
-    feature_names = [n for n in args.features if n != "customer_id"]
+    # All input FGs claim customer_id, so it is not requested by name; keep_index returns it.
+    feature_names = list(dict.fromkeys(n for n in args.features if n != "customer_id"))
     if not feature_names:
         print("Error: must request at least one feature (customer_id is automatic).", file=sys.stderr)
         return 1
-    features: list[Feature | str] = [Feature.not_typed(name) for name in feature_names]
 
     kwargs: dict[str, Any] = {
-        "features": features,
         "compute_frameworks": ["PandasDataFrame"],
         "links": _build_input_links(args.data_source),
     }
@@ -167,6 +164,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         extender = LineageExtender()
         kwargs["function_extender"] = {extender}
 
+    filter_names: list[str] = []
     if args.filter:
         gf = GlobalFilter()
         for spec in args.filter:
@@ -175,6 +173,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                 print(f"Error: filter format is FEATURE,TYPE,VALUE (got {spec!r})", file=sys.stderr)
                 return 1
             feat, ftype, val = parts
+            filter_names.append(feat)
             try:
                 if ftype == "range":
                     lo, hi = val.split(":")
@@ -189,19 +188,24 @@ def cmd_run(args: argparse.Namespace) -> int:
                 return 1
         kwargs["global_filter"] = gf
 
+    # Filter columns are requested too, so the filter reaches their feature group.
+    filter_only = [n for n in dict.fromkeys(filter_names) if n not in feature_names]
+    kwargs["features"] = [Feature(name, keep_index=True) for name in feature_names + filter_only]
+
     results = mloda_api.run_all(**kwargs)
 
     if args.lineage:
         print(extender.visualize())
         print()
 
-    frames = [_to_dataframe(r).reset_index(drop=True) for r in results]
-    merged = pd.concat(frames, axis=1) if frames else pd.DataFrame()
-
-    apps_fg = cast(Any, _get_applications_fg(args.data_source))
-    apps_df: pd.DataFrame = apps_fg.calculate_feature(None, cast(Any, None))
-    customer_ids = apps_df["customer_id"].reset_index(drop=True)
-    merged.insert(0, "customer_id", customer_ids)
+    # Each feature group returns its own frame; an inner join keeps the rows that pass every filter.
+    frames = [_to_dataframe(r) for r in results]
+    merged = functools.reduce(lambda left, right: left.merge(right, on="customer_id"), frames)
+    merged = merged.drop(columns=filter_only)
+    merged.insert(0, "customer_id", merged.pop("customer_id"))
+    if merged.empty:
+        print("No rows match the filter.", file=sys.stderr)
+        return 1
 
     if args.customer:
         merged = merged[merged["customer_id"] == args.customer]
@@ -252,7 +256,11 @@ def cmd_plan(args: argparse.Namespace) -> int:
     _get_applications_fg(args.data_source)
 
     features: list[Feature | str] = [Feature.not_typed(name) for name in args.features]
-    session = mloda_api.prepare(features=features, compute_frameworks=["PandasDataFrame"])
+    session = mloda_api.prepare(
+        features=features,
+        compute_frameworks=["PandasDataFrame"],
+        links=_build_input_links(args.data_source),
+    )
 
     if session.engine is None:
         print("Error: could not build execution plan.", file=sys.stderr)

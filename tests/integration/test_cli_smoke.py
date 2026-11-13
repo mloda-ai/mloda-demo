@@ -47,6 +47,35 @@ def test_cli_predict_returns_verdict_for_known_customer() -> None:
     assert any(verdict in result.stdout for verdict in ("good", "bad"))
 
 
+@pytest.mark.parametrize(
+    ("features", "expected"),
+    [
+        (["age", "credit_amount"], ("3000", "33")),
+        (["credit_risk", "duration"], ("24",)),
+        (["credit_amount"], ("3000",)),
+    ],
+)
+def test_cli_run_filter_keeps_customer_ids_on_their_rows(features: list[str], expected: tuple[str, ...]) -> None:
+    cli = _resolve_cli()
+    result = subprocess.run(
+        [cli, "run", *features, "--filter", "age,range,20:40"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    rows = [line.split() for line in result.stdout.splitlines()[1:]]
+    assert len(rows) == 1
+    assert rows[0][0] == "app-customer-e"
+    assert set(expected) <= set(rows[0])
+
+
+def test_cli_plan_credit_risk_joins_the_input_fgs() -> None:
+    cli = _resolve_cli()
+    result = subprocess.run([cli, "plan", "credit_risk"], capture_output=True, text=True, check=True)
+    assert "CreditRiskClassifierFG" in result.stdout
+    assert "joined" in result.stdout
+
+
 def test_cli_explain_runs_for_default_method() -> None:
     cli = _resolve_cli()
     result = subprocess.run(
