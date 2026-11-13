@@ -48,25 +48,33 @@ def test_cli_predict_returns_verdict_for_known_customer() -> None:
 
 
 @pytest.mark.parametrize(
-    ("features", "expected"),
+    ("args", "expected"),
     [
-        (["age", "credit_amount"], ("3000", "33")),
-        (["credit_risk", "duration"], ("24",)),
-        (["credit_amount"], ("3000",)),
+        (
+            ["age", "credit_amount", "--filter", "age,range,20:40"],
+            {"customer_id": "app-customer-e", "age": "33", "credit_amount": "3000"},
+        ),
+        (
+            ["credit_risk", "duration", "--filter", "age,range,20:40"],
+            {"customer_id": "app-customer-e", "duration": "24"},
+        ),
+        (["credit_amount", "--filter", "age,range,20:40"], {"customer_id": "app-customer-e", "credit_amount": "3000"}),
+        (
+            ["credit_amount", "age", "--filter", "customer_id,equal,app-customer-b"],
+            {"customer_id": "app-customer-b", "age": "47"},
+        ),
+        (
+            ["duration", "credit_amount", "--customer", "app-customer-c"],
+            {"customer_id": "app-customer-c", "duration": "48", "credit_amount": "1200"},
+        ),
     ],
 )
-def test_cli_run_filter_keeps_customer_ids_on_their_rows(features: list[str], expected: tuple[str, ...]) -> None:
+def test_cli_run_keeps_customer_ids_on_their_rows(args: list[str], expected: dict[str, str]) -> None:
     cli = _resolve_cli()
-    result = subprocess.run(
-        [cli, "run", *features, "--filter", "age,range,20:40"],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    rows = [line.split() for line in result.stdout.splitlines()[1:]]
+    result = subprocess.run([cli, "run", *args], capture_output=True, text=True, check=True)
+    header, *rows = [line.split() for line in result.stdout.splitlines()]
     assert len(rows) == 1
-    assert rows[0][0] == "app-customer-e"
-    assert set(expected) <= set(rows[0])
+    assert expected.items() <= dict(zip(header, rows[0])).items()
 
 
 def test_cli_plan_credit_risk_joins_the_input_fgs() -> None:

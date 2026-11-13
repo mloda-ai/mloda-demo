@@ -189,7 +189,7 @@ def cmd_run(args: argparse.Namespace) -> int:
         kwargs["global_filter"] = gf
 
     # Filter columns are requested too, so the filter reaches their feature group.
-    filter_only = [n for n in dict.fromkeys(filter_names) if n not in feature_names]
+    filter_only = [n for n in dict.fromkeys(filter_names) if n not in feature_names and n != "customer_id"]
     kwargs["features"] = [Feature(name, keep_index=True) for name in feature_names + filter_only]
 
     results = mloda_api.run_all(**kwargs)
@@ -201,10 +201,9 @@ def cmd_run(args: argparse.Namespace) -> int:
     # Each feature group returns its own frame; an inner join keeps the rows that pass every filter.
     frames = [_to_dataframe(r) for r in results]
     merged = functools.reduce(lambda left, right: left.merge(right, on="customer_id"), frames)
-    merged = merged.drop(columns=filter_only)
-    merged.insert(0, "customer_id", merged.pop("customer_id"))
+    merged = merged[["customer_id", *feature_names]]
     if merged.empty:
-        print("No rows match the filter.", file=sys.stderr)
+        print("No rows match.", file=sys.stderr)
         return 1
 
     if args.customer:
