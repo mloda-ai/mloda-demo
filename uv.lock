@@ -1364,26 +1364,26 @@ wheels = [
 
 [[package]]
 name = "mloda"
-version = "0.19.1"
+version = "0.20.0"
 source = { registry = "https://pypi.org/simple" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/87/341b2b63909f4fc2e4c0c03d1ebeb02eb743da09c33bd15ded4f14f60e71/mloda-0.19.1-py3-none-any.whl", hash = "sha256:65f156fa590aade822e43f4acfd154c84b0b2f8ca9546b705e23d4d226b6d7d5", size = 790815, upload-time = "2026-11-02T15:51:27.11Z" },
+    { url = "https://files.pythonhosted.org/packages/ac/6b/ba3721a820c64ad42036d1cd6e92a06b00ec94c20a1dc89ae4392409f9dc/mloda-0.20.0-py3-none-any.whl", hash = "sha256:b742173735a4e54e85ef6e88e0cd40a555b23c62fe24792eb02a1be252155a2d", size = 973643, upload-time = "2026-11-13T15:38:33.493Z" },
 ]
 
 [[package]]
 name = "mloda-community-extenders-shared"
-version = "0.12.0"
+version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mloda" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/55/ba/2a8c6d698a1902c15d5df03f7dd336a6ecbfda53ea57c901c9440ef7213c/mloda_community_extenders_shared-0.12.0-py3-none-any.whl", hash = "sha256:e37e5eaf347099af36b7c73406dbd03af6a8cd6831b0e633b6f1c7f5ea39e5c8", size = 17046, upload-time = "2026-11-02T23:40:53.711Z" },
+    { url = "https://files.pythonhosted.org/packages/83/e4/341abc381898fdcc406d11623f4126c4f0fda0baddfb6035d26824a3bdcb/mloda_community_extenders_shared-0.13.0-py3-none-any.whl", hash = "sha256:4767bdef51916684f964800a37a8dc6ae938823043ef41e0474d6906991e260e", size = 17046, upload-time = "2026-11-13T16:46:07.286Z" },
 ]
 
 [[package]]
 name = "mloda-community-openlineage"
-version = "0.12.0"
+version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mloda" },
@@ -1391,12 +1391,12 @@ dependencies = [
     { name = "openlineage-python" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/07/4b/eafc582b6fff62086a444f62ba9af93fc5674a6f40cd26f8fc2673d74186/mloda_community_openlineage-0.12.0-py3-none-any.whl", hash = "sha256:fe9c88c366ff38798964dfd00dc898411c5f14ddb2ff814c92f69ef94cf51341", size = 26497, upload-time = "2026-11-02T23:41:25.037Z" },
+    { url = "https://files.pythonhosted.org/packages/78/0d/a39b09b973e6d3c7374738fcf30e1b36319c90461875f33405aa2f498dd9/mloda_community_openlineage-0.13.0-py3-none-any.whl", hash = "sha256:057e201edc2fd9af15723ca0db9267bf22bac5e50224d4e3be74c0009a7fd513", size = 26499, upload-time = "2026-11-13T16:46:38.598Z" },
 ]
 
 [[package]]
 name = "mloda-community-otel"
-version = "0.12.0"
+version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mloda" },
@@ -1404,7 +1404,7 @@ dependencies = [
     { name = "opentelemetry-api" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/78/22/0dd8d9af8b6ad7c6789e86aa07d6fd5b1524587ae6d927eea657e1bd9968/mloda_community_otel-0.12.0-py3-none-any.whl", hash = "sha256:bdcbfdc289f12b95b7e1f45b0ba74482f53c9b3fde39e06f552fbe9224dcce1c", size = 23776, upload-time = "2026-11-02T23:41:18.779Z" },
+    { url = "https://files.pythonhosted.org/packages/78/5b/cacd1640ca3f4414219687f1d5bc2d954c83eeebd788cd4f204581217246/mloda_community_otel-0.13.0-py3-none-any.whl", hash = "sha256:37852b0d0de6f9b676038641cd78f6174c6375f6c971cdd4a720b9d70c360cf7", size = 23779, upload-time = "2026-11-13T16:46:32.354Z" },
 ]
 
 [[package]]
@@ -1447,10 +1447,10 @@ requires-dist = [
     { name = "bandit", marker = "extra == 'dev'" },
     { name = "marimo" },
     { name = "matplotlib" },
-    { name = "mloda", specifier = ">=0.19.1,<0.20.0" },
-    { name = "mloda-community-openlineage", specifier = ">=0.12.0" },
-    { name = "mloda-community-otel", specifier = ">=0.12.0" },
-    { name = "mloda-testing", marker = "extra == 'dev'", specifier = ">=0.12.0" },
+    { name = "mloda", specifier = ">=0.20.0,<0.21.0" },
+    { name = "mloda-community-openlineage", specifier = ">=0.13.0" },
+    { name = "mloda-community-otel", specifier = ">=0.13.0" },
+    { name = "mloda-testing", marker = "extra == 'dev'", specifier = ">=0.13.0" },
     { name = "mypy", marker = "extra == 'dev'" },
     { name = "numpy" },
     { name = "openml", marker = "extra == 'dev'" },
@@ -1469,7 +1469,7 @@ provides-extras = ["credit-risk", "dev"]
 
 [[package]]
 name = "mloda-testing"
-version = "0.12.0"
+version = "0.13.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "mloda" },
@@ -1477,7 +1477,7 @@ dependencies = [
     { name = "pytest" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f8/c4/1ccc749423a638d3ae2864bfdcfb92f88919dbcfa3c1a5735ad18e9a764e/mloda_testing-0.12.0-py3-none-any.whl", hash = "sha256:ad05bc1d4ca31004070833270ac587d1446bf25690343f7960da5e3cbbd9a593", size = 272232, upload-time = "2026-11-02T23:43:51.753Z" },
+    { url = "https://files.pythonhosted.org/packages/59/eb/92c88a688c69d9a8f0717cc1600061cd3d09527d2fa1a3479af65701fca5/mloda_testing-0.13.0-py3-none-any.whl", hash = "sha256:9217aef7a2d413aa5f21ca13eec22de541213f10abf87d4cc415b18c4a4e8e41", size = 271777, upload-time = "2026-11-13T16:49:05.247Z" },
 ]
 
 [[package]]
