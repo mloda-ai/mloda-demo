@@ -45,6 +45,11 @@ def test_cli_predict_returns_verdict_for_known_customer() -> None:
     )
     assert "app-customer-c" in result.stdout
     assert any(verdict in result.stdout for verdict in ("good", "bad"))
+    run = subprocess.run(
+        [cli, "run", "credit_risk", "--customer", "app-customer-c"], capture_output=True, text=True, check=True
+    )
+    predicted, joined = (dict(zip(*[line.split() for line in r.stdout.splitlines()])) for r in (result, run))
+    assert predicted["credit_risk"] == joined["credit_risk"]
 
 
 @pytest.mark.parametrize(
