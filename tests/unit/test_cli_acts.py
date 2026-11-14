@@ -19,7 +19,7 @@ from mloda_demo.cli import (
     _get_input_links,
 )
 from mloda_demo.feature_groups.classifier.artifact import MODEL_STATE_PATH, load_artifact
-from mloda_demo.feature_groups.classifier.credit_risk_classifier_fg import _ensure_artifact
+from mloda_demo.feature_groups.classifier.credit_risk_classifier_fg import CreditRiskClassifierFG, _ensure_artifact
 from mloda_demo.feature_groups.classifier.encoder import FEATURE_COLUMNS
 from mloda_demo.feature_groups.inputs.applications_fg import ApplicationsFG
 from mloda_demo.feature_groups.inputs.financials_fg import FinancialsFG
@@ -79,7 +79,7 @@ def test_act2_run_all_pulls_input_features_from_three_fgs() -> None:
 def test_act3_predict_for_known_customer() -> None:
     """credit_risk resolves through CreditRiskClassifierFG, with Links wiring inputs."""
     results = mloda_api.run_all(
-        features=[Feature.not_typed("credit_risk")],
+        features=[Feature("credit_risk", keep_index=True)],
         compute_frameworks=["PandasDataFrame"],
         links=_get_input_links(),
     )
@@ -89,6 +89,14 @@ def test_act3_predict_for_known_customer() -> None:
     assert len(df) == 5
     for v in df["credit_risk"]:
         assert v in (0, 1)
+    # Each customer_id carries its own prediction, not one taken by row position.
+    merged = (
+        ApplicationsFG.calculate_feature(None, None)
+        .merge(FinancialsFG.calculate_feature(None, None), on="customer_id")
+        .merge(QuestionnaireFG.calculate_feature(None, None), on="customer_id")
+    )
+    expected = CreditRiskClassifierFG.calculate_feature(merged, None)["credit_risk"]
+    assert dict(zip(df["customer_id"], df["credit_risk"])) == dict(zip(merged["customer_id"], expected))
 
 
 # Act 3b -- Explain (attribution) ---------------------------------------------

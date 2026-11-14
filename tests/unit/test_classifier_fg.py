@@ -61,6 +61,11 @@ def test_calculate_feature_predicts_credit_risk() -> None:
     assert result["credit_risk"][0] in (0, 1)
 
 
+def test_calculate_feature_on_empty_input_returns_empty_column() -> None:
+    df = pd.DataFrame(columns=FEATURE_COLUMNS)
+    assert CreditRiskClassifierFG.calculate_feature(df, None) == {"credit_risk": []}
+
+
 @pytest.mark.slow
 def test_artifact_roundtrip_reuses_model() -> None:
     df = pd.DataFrame([_fake_customer_row()])

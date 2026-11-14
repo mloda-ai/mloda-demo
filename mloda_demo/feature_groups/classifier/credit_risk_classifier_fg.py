@@ -56,8 +56,10 @@ class CreditRiskClassifierFG(FeatureGroup):
 
     @classmethod
     def calculate_feature(cls, data: Any, features: FeatureSet) -> Any:
-        artifact = _ensure_artifact()
         df = data if isinstance(data, pd.DataFrame) else pd.DataFrame(data)
+        if df.empty:
+            return {"credit_risk": []}
+        artifact = _ensure_artifact()
         X = artifact.encoder.encode(df[FEATURE_COLUMNS])
         with torch.no_grad():
             logits = artifact.model(torch.tensor(X, dtype=torch.float32))
