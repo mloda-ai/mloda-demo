@@ -179,7 +179,7 @@ def cmd_run(args: argparse.Namespace) -> int:
                     lo, hi = val.split(":")
                     gf.add_filter(feat, FilterType.RANGE, {"min": float(lo), "max": float(hi)})
                 elif ftype == "equal":
-                    gf.add_filter(feat, FilterType.EQUAL, {"value": val})
+                    gf.add_filter(feat, FilterType.EQUAL, {"value": _parse_filter_value(val)})
                 else:
                     print(f"Error: unknown filter type {ftype!r} (range|equal)", file=sys.stderr)
                     return 1
@@ -226,7 +226,7 @@ def cmd_predict(args: argparse.Namespace) -> int:
             print("Error: applications.db not found. Run `mloda-demo migrate` first.", file=sys.stderr)
             return 1
 
-    features: list[Feature | str] = [Feature.not_typed("credit_risk")]
+    features: list[Feature | str] = [Feature("credit_risk", keep_index=True)]
     results = mloda_api.run_all(
         features=features,
         compute_frameworks=["PandasDataFrame"],
@@ -235,11 +235,7 @@ def cmd_predict(args: argparse.Namespace) -> int:
     if not results:
         print("mloda.run_all returned no results.", file=sys.stderr)
         return 1
-    df = _to_dataframe(results[0]).reset_index(drop=True)
-    apps_fg = cast(Any, _get_applications_fg(args.data_source))
-    apps_df: pd.DataFrame = apps_fg.calculate_feature(None, cast(Any, None))
-    customer_ids = apps_df["customer_id"].reset_index(drop=True)
-    df.insert(0, "customer_id", customer_ids)
+    df = _to_dataframe(results[0])[["customer_id", "credit_risk"]]
     if args.customer:
         df = df[df["customer_id"] == args.customer]
         if df.empty:
@@ -369,6 +365,16 @@ def cmd_explain(args: argparse.Namespace) -> int:
             print(f"  {name:>30s}  {float(value):+.4f}")
         print()
     return 0
+
+
+def _parse_filter_value(val: str) -> int | float | str:
+    """Numbers compare as numbers, anything else as a string."""
+    for parse in (int, float):
+        try:
+            return parse(val)
+        except ValueError:
+            pass
+    return val
 
 
 def _to_dataframe(result: Any) -> pd.DataFrame:
