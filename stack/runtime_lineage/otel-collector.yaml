@@ -1,0 +1,35 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch: {}
+  delta_to_cumulative: {}
+
+exporters:
+  otlp_grpc/tempo:
+    endpoint: ${env:TEMPO_ENDPOINT:-tempo:4317}
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:8889
+    metric_expiration: 30m
+  debug: {}
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp_grpc/tempo]
+    metrics:
+      receivers: [otlp]
+      processors: [delta_to_cumulative, batch]
+      exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      exporters: [debug]
