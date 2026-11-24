@@ -9,7 +9,7 @@ description = "Live demos built on mloda: credit risk with XAI attribution, Phys
 license = "Apache-2.0"
 authors = [{ name = "Tom Kaltofen", email = "tom@mloda.ai" }]
 dependencies = [
-    "mloda>=0.20.0,<0.21.0",
+    "mloda>=0.20.0,<0.22.0",
     "mloda-community-otel>=0.13.0",
     "mloda-community-openlineage>=0.13.0",
     "opentelemetry-sdk>=1.30,<2",
